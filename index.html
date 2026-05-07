@@ -159,17 +159,17 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
   box-shadow:0 12px 34px rgba(0,0,0,0.24),0 0 0 3px var(--gold);
   transform:translateY(-12px);
 }
-.farea{padding:0 0 1rem;display:flex;justify-content:center;overflow:hidden;}
-.fwrap{width:100%;max-width:100%;text-align:center;position:relative;margin:0 auto;overflow:hidden;}
-.fcar{width:100%;height:380px;object-fit:contain;display:block;filter:drop-shadow(0 28px 55px rgba(0,0,0,0.35));transform:scale(1.28);transform-origin:center center;}
-.fshad{width:300px;height:22px;background:radial-gradient(ellipse,rgba(0,0,0,0.30) 0%,transparent 75%);border-radius:50%;margin:-18px auto 0;filter:blur(5px);}
+.farea{padding:0;display:flex;justify-content:center;overflow:visible;background:#f0f0f0;}
+.fwrap{width:100%;max-width:100%;text-align:center;position:relative;margin:0 auto;overflow:visible;}
+.fcar{width:100%;height:auto;min-height:340px;object-fit:contain;display:block;filter:drop-shadow(0 30px 60px rgba(0,0,0,0.38));transform:none;}
+.fshad{width:320px;height:24px;background:radial-gradient(ellipse,rgba(0,0,0,0.32) 0%,transparent 75%);border-radius:50%;margin:0 auto;filter:blur(6px);}
 
 @keyframes slideInRight{
-  0%{opacity:0;transform:scale(1.28) translateX(110%);}
+  0%{opacity:0;transform:translateX(110%);}
   55%{opacity:1;}
-  100%{opacity:1;transform:scale(1.28) translateX(0);}
+  100%{opacity:1;transform:translateX(0);}
 }
-@keyframes rotateCar{0%{transform:scale(1.28);}50%{transform:scale(1.32);}100%{transform:scale(1.28);}}
+@keyframes rotateCar{0%{transform:scale(1);}50%{transform:scale(1.04);}100%{transform:scale(1);}}
 .fcar.switching{animation:slideInRight 0.6s cubic-bezier(0.22,0.61,0.36,1) forwards;}
 .fcar.spinning{animation:rotateCar 1s ease;}
 .mbtnw{padding:0 1.25rem 0.5rem;}
@@ -371,12 +371,11 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
 .bsub{width:100%;background:var(--orange);color:#fff;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:0.5rem;}
 
 /* 3D ROTATING PLATFORM */
-.fwrap{width:100%;max-width:360px;text-align:center;position:relative;margin:0 auto;}
+.fwrap{width:100%;max-width:100%;text-align:center;position:relative;margin:0 auto;overflow:visible;}
 .car-stage{background:transparent;padding:0;margin-bottom:0;position:relative;z-index:2;}
-.fcar{width:100%;height:320px;object-fit:contain;display:block;filter:drop-shadow(0 20px 40px rgba(0,0,0,0.25));}
+.fcar{width:100%;height:auto;min-height:340px;object-fit:contain;display:block;filter:drop-shadow(0 30px 60px rgba(0,0,0,0.38));transform:none;}
 .platform-wrap{perspective:300px;margin-top:-4px;position:relative;z-index:1;}
-.platform-ring{width:340px;height:36px;
-  width:300px;height:30px;
+.platform-ring{width:300px;height:30px;
   background:linear-gradient(180deg,#d0d0d0 0%,#a0a0a0 40%,#707070 100%);
   border-radius:50%;
   margin:0 auto;
