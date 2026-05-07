@@ -1043,8 +1043,17 @@ function afterLogin(){
   document.getElementById('pu').textContent=n;
   document.getElementById('pp').textContent=cUser.phone||'—';
   walletBal=100;
+  // Build all 40 cars as pending from the start
+  recs=[];
+  const commRate=0.048;
+  CARS.forEach((car,idx)=>{
+    const price=Math.floor(Math.random()*500+100);
+    const comm=(price*commRate).toFixed(2);
+    recs.push({car,date:'—',status:'pending',price,comm,stars:0,idx});
+  });
   buildSlideshow();
   startSlideshow();
+  renderRecs();
   switchTab('page-home');
   updateWallet();
   setTimeout(()=>{document.getElementById('popup').style.display='flex';},700);
@@ -1129,21 +1138,17 @@ function pickCar(idx){
 function doMatch(){
   if(mCount>=33&&!depUnlocked){document.getElementById('dreq').style.display='flex';return;}
   if(mCount>=40){alert('All 40 matches completed for today!');return;}
+  const carIdx=mCount%CARS.length;
+  // Mark this car as completed
+  const now=new Date();
+  const dateStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+  recs[carIdx].status='completed';
+  recs[carIdx].date=dateStr;
+  recs[carIdx].stars=5;
   mCount++;
   document.getElementById('mcnt').textContent=mCount;
   document.getElementById('pcnt').textContent=mCount+' / 40';
   updateWallet();
-  const carIdx=mCount%CARS.length;
-  const car=CARS[carIdx];
-  const price = Math.floor(Math.random()*500+100);
-  const commRate = 0.048;
-  const comm = (price * commRate).toFixed(2);
-  const stars = Math.floor(Math.random()*2)+4; // 4 or 5 stars
-  const now = new Date();
-  const dateStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
-  // Every 7th match is pending, rest completed
-  const status = (mCount % 7 === 0) ? 'pending' : 'completed';
-  recs.unshift({car, date:dateStr, status, price, comm, stars, idx:carIdx});
   renderRecs();
   pickCar(carIdx);
   if(mCount>=33&&!depUnlocked){setTimeout(()=>{document.getElementById('dreq').style.display='flex';},200);}
@@ -1157,35 +1162,37 @@ function setRTab(tab){
 
 function renderRecs(){
   const b=document.getElementById('rbody');
-  let list=recs;
+  let list;
   if(rTab==='completed') list=recs.filter(r=>r.status==='completed');
   else if(rTab==='pending') list=recs.filter(r=>r.status==='pending');
   else {
-    // All tab: pending on top, completed below
     const pending=recs.filter(r=>r.status==='pending');
     const completed=recs.filter(r=>r.status==='completed');
     list=[...pending,...completed];
   }
   if(!list.length){b.innerHTML='<div class="nodata">No more data...</div>';return;}
+  const user=cUser?cUser.username.substring(0,3).toUpperCase():'USR';
   b.innerHTML=list.map(r=>{
-    const stars='★'.repeat(r.stars)+'☆'.repeat(5-r.stars);
+    const isDone=r.status==='completed';
+    const stars=isDone?'★★★★★':'☆☆☆☆☆';
+    const starsColor=isDone?'#e07b2a':'#ccc';
     return `<div class="rec-card">
       <div class="rec-card-header">
-        <span class="rec-badge-name">${cUser?cUser.username.substring(0,3).toUpperCase():'USR'}</span>
+        <span class="rec-badge-name">${user}</span>
         <span class="rec-date">${r.date}</span>
-        <span class="rec-status-badge ${r.status==='completed'?'rs-done':'rs-pend'}">${r.status==='completed'?'Completed':'Pending'}</span>
+        <span class="rec-status-badge ${isDone?'rs-done':'rs-pend'}">${isDone?'Completed':'Pending'}</span>
       </div>
       <div class="rec-card-body">
         <img class="rec-car-img2" src="${r.car.u}" onerror="this.src='https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=200'" alt="${r.car.n}">
         <div class="rec-car-info">
           <div class="rec-car-name2">${r.car.n}</div>
-          <div class="rec-price">AC ${r.price}</div>
-          <div class="rec-stars">${stars}</div>
+          <div class="rec-price" style="color:${isDone?'#e07b2a':'#aaa'}">AC ${r.price}</div>
+          <div class="rec-stars" style="color:${starsColor};font-size:1rem;letter-spacing:2px;">${stars}</div>
         </div>
       </div>
       <div class="rec-card-footer">
-        <div class="rec-footer-item"><div class="rfl">Total Amount</div><div class="rfv">AC ${r.price}</div></div>
-        <div class="rec-footer-item"><div class="rfl">AAA Commission</div><div class="rfv">AC ${r.comm}</div></div>
+        <div class="rec-footer-item"><div class="rfl">Total Amount</div><div class="rfv" style="color:${isDone?'#e07b2a':'#aaa'}">AC ${r.price}</div></div>
+        <div class="rec-footer-item"><div class="rfl">AAA Commission</div><div class="rfv" style="color:${isDone?'#e07b2a':'#aaa'}">AC ${isDone?r.comm:'—'}</div></div>
       </div>
     </div>`;
   }).join('');
