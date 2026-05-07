@@ -160,12 +160,17 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
   transform:translateY(-10px);
 }
 .farea{padding:0.5rem 1.25rem 1rem;display:flex;justify-content:center;}
-.fwrap{width:100%;max-width:420px;text-align:center;position:relative;margin:0 auto;}
-.fcar{width:100%;height:320px;object-fit:contain;display:block;filter:drop-shadow(0 20px 40px rgba(0,0,0,0.25));}
-.fshad{width:220px;height:18px;background:radial-gradient(ellipse,rgba(0,0,0,0.25) 0%,transparent 75%);border-radius:50%;margin:-10px auto 0;filter:blur(3px);}
+.fwrap{width:100%;max-width:100%;text-align:center;position:relative;margin:0 auto;overflow:hidden;}
+.fcar{width:100%;height:260px;object-fit:contain;display:block;filter:drop-shadow(0 24px 48px rgba(0,0,0,0.32));transform:scale(1.18);transform-origin:center center;}
+.fshad{width:260px;height:20px;background:radial-gradient(ellipse,rgba(0,0,0,0.28) 0%,transparent 75%);border-radius:50%;margin:-14px auto 0;filter:blur(4px);}
 
-
-@keyframes rotateCar{0%{transform:scale(1);}50%{transform:scale(1.04);}100%{transform:scale(1);}}
+@keyframes slideInRight{
+  0%{opacity:0;transform:scale(1.18) translateX(100%);}
+  60%{opacity:1;}
+  100%{opacity:1;transform:scale(1.18) translateX(0);}
+}
+@keyframes rotateCar{0%{transform:scale(1.18);}50%{transform:scale(1.22);}100%{transform:scale(1.18);}}
+.fcar.switching{animation:slideInRight 0.55s cubic-bezier(0.25,0.46,0.45,0.94) forwards;}
 .fcar.spinning{animation:rotateCar 1s ease;}
 .mbtnw{padding:0 1.25rem 0.5rem;}
 .mbtn{width:100%;background:var(--orange);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:15px;border:none;border-radius:28px;cursor:pointer;transition:all .2s;}
@@ -1108,10 +1113,10 @@ function pickCar(idx){
   const fc=document.getElementById('fcar');
   fc.classList.remove('switching');
   void fc.offsetWidth;
-  fc.classList.add('switching');
   fc.src=CARS[idx].u; fc.alt=CARS[idx].n;
   fc.onerror=function(){this.src='https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400';};
-  setTimeout(()=>fc.classList.remove('switching'),500);
+  fc.classList.add('switching');
+  fc.addEventListener('animationend',function h(){fc.classList.remove('switching');fc.removeEventListener('animationend',h);});
 }
 
 function doMatch(){
