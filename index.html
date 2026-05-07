@@ -383,6 +383,26 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
   100%{opacity:1;transform:scale(1);}
 }
 .fcar.switching{animation:carSwitch 0.5s ease;}
+
+/* RECORD CARDS */
+.rec-card{background:#fff;border-radius:12px;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.07);}
+.rec-card-header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #f0f0f0;}
+.rec-badge-name{background:var(--orange);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.8rem;padding:3px 8px;border-radius:4px;}
+.rec-date{flex:1;font-size:0.78rem;color:#999;}
+.rec-status-badge{padding:4px 12px;border-radius:4px;font-size:0.75rem;font-weight:700;text-transform:uppercase;}
+.rs-done{background:#e8f5e9;color:#2e7d32;}
+.rs-pend{background:#fff3e0;color:#e65100;}
+.rec-card-body{display:flex;align-items:center;gap:14px;padding:14px;}
+.rec-car-img2{width:110px;height:80px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#f5f5f5;}
+.rec-car-info{flex:1;}
+.rec-car-name2{font-weight:700;font-size:0.95rem;color:var(--navy);margin-bottom:4px;}
+.rec-price{font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.rec-stars{color:#f5a623;font-size:1.1rem;letter-spacing:2px;}
+.rec-card-footer{display:flex;border-top:1px solid #f0f0f0;}
+.rec-footer-item{flex:1;padding:10px 14px;}
+.rec-footer-item+.rec-footer-item{border-left:1px solid #f0f0f0;}
+.rfl{font-size:0.74rem;color:#999;margin-bottom:3px;}
+.rfv{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--orange);}
 </style>
 </head>
 <body>
@@ -1073,10 +1093,19 @@ function doMatch(){
   document.getElementById('mcnt').textContent=mCount;
   document.getElementById('pcnt').textContent=mCount+' / 40';
   updateWallet();
-  const car=CARS[mCount%CARS.length];
-  recs.unshift({car,time:new Date().toLocaleTimeString(),status:'completed',comm:(Math.random()*5+1).toFixed(2)});
+  const carIdx=mCount%CARS.length;
+  const car=CARS[carIdx];
+  const price = Math.floor(Math.random()*500+100);
+  const commRate = 0.048;
+  const comm = (price * commRate).toFixed(2);
+  const stars = Math.floor(Math.random()*2)+4; // 4 or 5 stars
+  const now = new Date();
+  const dateStr = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+  // Every 7th match is pending, rest completed
+  const status = (mCount % 7 === 0) ? 'pending' : 'completed';
+  recs.unshift({car, date:dateStr, status, price, comm, stars, idx:carIdx});
   renderRecs();
-  pickCar(mCount%CARS.length);
+  pickCar(carIdx);
   if(mCount>=33&&!depUnlocked){setTimeout(()=>{document.getElementById('dreq').style.display='flex';},200);}
 }
 
@@ -1089,10 +1118,37 @@ function setRTab(tab){
 function renderRecs(){
   const b=document.getElementById('rbody');
   let list=recs;
-  if(rTab==='completed')list=recs.filter(r=>r.status==='completed');
-  if(rTab==='pending')list=recs.filter(r=>r.status==='pending');
+  if(rTab==='completed') list=recs.filter(r=>r.status==='completed');
+  else if(rTab==='pending') list=recs.filter(r=>r.status==='pending');
+  else {
+    // All tab: pending on top, completed below
+    const pending=recs.filter(r=>r.status==='pending');
+    const completed=recs.filter(r=>r.status==='completed');
+    list=[...pending,...completed];
+  }
   if(!list.length){b.innerHTML='<div class="nodata">No more data...</div>';return;}
-  b.innerHTML=list.map(r=>`<div class="ritem"><div class="rcrow"><img class="rcimg" src="${r.car.u}" alt="${r.car.n}" onerror="this.src='https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=100'"><div><div class="rcname">${r.car.n}</div><div class="rtime">${r.time}</div></div></div><div class="rrgt"><div class="sbadge ${r.status==='completed'?'sd':'sp'}">${r.status==='completed'?'Completed':'Pending'}</div><div class="rcomm">+${r.comm} AC</div></div></div>`).join('');
+  b.innerHTML=list.map(r=>{
+    const stars='★'.repeat(r.stars)+'☆'.repeat(5-r.stars);
+    return `<div class="rec-card">
+      <div class="rec-card-header">
+        <span class="rec-badge-name">${cUser?cUser.username.substring(0,3).toUpperCase():'USR'}</span>
+        <span class="rec-date">${r.date}</span>
+        <span class="rec-status-badge ${r.status==='completed'?'rs-done':'rs-pend'}">${r.status==='completed'?'Completed':'Pending'}</span>
+      </div>
+      <div class="rec-card-body">
+        <img class="rec-car-img2" src="${r.car.u}" onerror="this.src='https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=200'" alt="${r.car.n}">
+        <div class="rec-car-info">
+          <div class="rec-car-name2">${r.car.n}</div>
+          <div class="rec-price">AC ${r.price}</div>
+          <div class="rec-stars">${stars}</div>
+        </div>
+      </div>
+      <div class="rec-card-footer">
+        <div class="rec-footer-item"><div class="rfl">Total Amount</div><div class="rfv">AC ${r.price}</div></div>
+        <div class="rec-footer-item"><div class="rfl">AAA Commission</div><div class="rfv">AC ${r.comm}</div></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function tFaq(el){const a=el.nextElementSibling,c=el.querySelector('.fc2');a.classList.toggle('open');c.classList.toggle('open');}
