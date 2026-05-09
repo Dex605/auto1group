@@ -159,8 +159,8 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
   box-shadow:0 10px 28px rgba(0,0,0,0.22),0 0 0 2.5px var(--gold);
   transform:translateY(-10px);
 }
-.farea{padding:0;display:flex;justify-content:center;overflow:hidden;background:#f0f0f0;height:280px;}
-.fwrap{width:100%;max-width:100%;text-align:center;position:relative;margin:0 auto;overflow:hidden;height:280px;}
+.farea{padding:0;display:flex;justify-content:center;overflow:hidden;background:#f0f0f0;height:360px;}
+.fwrap{width:100%;max-width:100%;text-align:center;position:relative;margin:0 auto;overflow:hidden;height:360px;}
 .fcar{width:80%;height:100%;object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 20px 40px rgba(0,0,0,0.30));transform:translateX(0);}
 .fshad{width:240px;height:18px;background:radial-gradient(ellipse,rgba(0,0,0,0.28) 0%,transparent 75%);border-radius:50%;margin:0 auto;filter:blur(5px);}
 
@@ -373,9 +373,9 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
 .bsub{width:100%;background:var(--orange);color:#fff;border:none;border-radius:8px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:0.5rem;}
 
 /* 3D ROTATING PLATFORM */
-.fwrap{width:100%;max-width:100%;text-align:center;position:relative;margin:0 auto;overflow:visible;}
+.fwrap{width:100%;max-width:100%;text-align:center;position:relative;margin:0 auto;overflow:hidden;}
 .car-stage{background:transparent;padding:0;margin-bottom:0;position:relative;z-index:2;}
-.fcar{width:100%;height:auto;min-height:340px;object-fit:contain;display:block;filter:drop-shadow(0 30px 60px rgba(0,0,0,0.38));transform:none;}
+.fcar{width:80%;height:100%;object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 20px 40px rgba(0,0,0,0.30));transform:translateX(0);}
 .platform-wrap{perspective:300px;margin-top:-4px;position:relative;z-index:1;}
 .platform-ring{width:300px;height:30px;
   background:linear-gradient(180deg,#d0d0d0 0%,#a0a0a0 40%,#707070 100%);
@@ -430,6 +430,9 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
 
 /* CUSTOMER CARE BUTTON */
 .cc-btn{position:absolute;top:18px;right:18px;width:44px;height:44px;border-radius:50%;background:var(--orange);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:0 4px 14px rgba(0,0,0,0.25);z-index:10;}
+.ferr{display:none;color:#e53e3e;font-size:0.78rem;margin-top:4px;padding-left:2px;}
+.cc-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:998;}
+.cc-overlay.show{display:block;}
 .cc-popup{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:20px 20px 0 0;padding:1.5rem;box-shadow:0 -8px 30px rgba(0,0,0,0.18);z-index:999;display:none;}
 .cc-popup.show{display:block;}
 .cc-popup-title{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;letter-spacing:1px;color:var(--navy);font-weight:700;margin-bottom:1rem;text-align:center;}
@@ -532,6 +535,7 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
       <div class="fg">
         <label class="fl">Username or Phone Number</label>
         <input class="fi" type="text" id="si-u" placeholder="Enter username or phone number">
+        <span class="ferr" id="si-err-u"></span>
       </div>
       <div class="fg">
         <label class="fl">Password</label>
@@ -539,7 +543,9 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
           <input class="fi pt" type="password" id="si-p" placeholder="Enter your password">
           <button class="eye" onclick="eyeT('si-p',this)">👁</button>
         </div>
+        <span class="ferr" id="si-err-p"></span>
       </div>
+      <span class="ferr" id="si-err-g" style="margin-bottom:8px;"></span>
       <button class="bauth" onclick="doSignIn()">Log In</button>
       <div class="aswitch">Don't have an account? <a onclick="goTo('page-signup')">Sign Up</a></div>
       <div class="aback"><a onclick="goTo('page-landing')">← Back to Home</a></div>
@@ -559,15 +565,16 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
       </div>
       <div class="atitle">Create Account</div>
       <div class="asub">Join Auto1 Group today</div>
-      <div class="fg"><label class="fl">Username or Phone Number</label><input class="fi" type="text" id="su-u" placeholder="Username or phone number"></div>
-      <div class="fg"><label class="fl">Email Address</label><input class="fi" type="email" id="su-e" placeholder="your@email.com"></div>
-      <div class="fg"><label class="fl">Password</label><div class="fw"><input class="fi pt" type="password" id="su-p" placeholder="Create a password"><button class="eye" onclick="eyeT('su-p',this)">👁</button></div></div>
-      <div class="fg"><label class="fl">Confirm Password</label><div class="fw"><input class="fi pt" type="password" id="su-p2" placeholder="Confirm your password"><button class="eye" onclick="eyeT('su-p2',this)">👁</button></div></div>
-      <div class="fg"><label class="fl">Invitation Code</label><input class="fi" type="text" id="su-c" placeholder="Enter invitation code" style="text-transform:uppercase;letter-spacing:3px;"></div>
+      <div class="fg"><label class="fl">Username</label><input class="fi" type="text" id="su-u" placeholder="Enter username (min 3 characters)"><span class="ferr" id="su-err-u"></span></div>
+      <div class="fg"><label class="fl">Email Address</label><input class="fi" type="email" id="su-e" placeholder="your@email.com"><span class="ferr" id="su-err-e"></span></div>
+      <div class="fg"><label class="fl">Password</label><div class="fw"><input class="fi pt" type="password" id="su-p" placeholder="More than 6 characters"><button class="eye" onclick="eyeT('su-p',this)">👁</button></div><span class="ferr" id="su-err-p"></span></div>
+      <div class="fg"><label class="fl">Confirm Password</label><div class="fw"><input class="fi pt" type="password" id="su-p2" placeholder="Confirm your password"><button class="eye" onclick="eyeT('su-p2',this)">👁</button></div><span class="ferr" id="su-err-p2"></span></div>
+      <div class="fg"><label class="fl">Invitation Code</label><input class="fi" type="text" id="su-c" placeholder="Enter invitation code" style="text-transform:uppercase;letter-spacing:3px;"><span class="ferr" id="su-err-c"></span></div>
       <div class="tchk">
         <input type="checkbox" id="su-t">
         <label for="su-t">I agree to the <a onclick="showTerms()">Terms &amp; Conditions</a></label>
       </div>
+      <span class="ferr" id="su-err-t"></span>
       <button class="bauth" onclick="doSignUp()">Sign Up</button>
       <div class="aswitch">Already have an account? <a onclick="goTo('page-signin')">Sign In</a></div>
       <div class="aback"><a onclick="goTo('page-landing')">← Back to Home</a></div>
@@ -1019,20 +1026,25 @@ function closeSub(){const p=subHist.pop();if(p)goTo(p);else goTo('page-my');}
 
 function eyeT(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='🙈';}else{i.type='password';btn.textContent='👁';}}
 
+function showErr(id,msg){
+  const el=document.getElementById(id);
+  if(el){el.textContent=msg;el.style.display=msg?'block':'none';}
+}
+function clearErrs(ids){ids.forEach(id=>showErr(id,''));}
+
 function doSignIn(){
   const u=document.getElementById('si-u').value.trim();
   const p=document.getElementById('si-p').value;
-  // Validate username or phone
+  clearErrs(['si-err-u','si-err-p','si-err-g']);
   const isPhone=/^\+?\d[\d\s\-]{7,}$/.test(u);
   const isUsername=u.length>=3;
-  if(!u){alert('Please enter your username or phone number.');return;}
-  if(!isPhone&&!isUsername){alert('Username must be at least 3 characters, or enter a valid phone number.');return;}
-  if(!p){alert('Please enter your password.');return;}
-  if(p.length<=6){alert('Password must be more than 6 characters.');return;}
-  // Check credentials match a registered user
+  if(!u){showErr('si-err-u','Please enter your username or phone number.');return;}
+  if(!isPhone&&!isUsername){showErr('si-err-u','Username must be at least 3 characters, or enter a valid phone number.');return;}
+  if(!p){showErr('si-err-p','Please enter your password.');return;}
+  if(p.length<=6){showErr('si-err-p','Password must be more than 6 characters.');return;}
   const users=JSON.parse(localStorage.getItem('a1g_users')||'[]');
   const found=users.find(x=>(x.username===u||x.phone===u)&&x.password===p);
-  if(!found){alert('Incorrect username or password. Please try again.');return;}
+  if(!found){showErr('si-err-g','Incorrect username or password. Please try again.');return;}
   cUser={username:found.username,email:found.email,phone:found.phone};
   afterLogin();
 }
@@ -1044,21 +1056,16 @@ function doSignUp(){
   const p2=document.getElementById('su-p2').value;
   const c=document.getElementById('su-c').value.trim().toUpperCase();
   const t=document.getElementById('su-t').checked;
-  // Validate username
-  if(!u||u.length<3){alert('Username must be at least 3 characters.');return;}
-  // Validate email
-  if(!e||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){alert('Please enter a valid email address.');return;}
-  // Validate password
-  if(p.length<=6){alert('Password must be more than 6 characters.');return;}
-  if(p!==p2){alert('Passwords do not match.');return;}
-  // Validate invitation code
-  if(!c){alert('Please enter your invitation code.');return;}
-  if(c!=='XGU9KL'){alert('Invalid invitation code. Please check and try again.');return;}
-  if(!t){alert('Please accept the Terms & Conditions to continue.');return;}
-  // Check if username already exists
+  clearErrs(['su-err-u','su-err-e','su-err-p','su-err-p2','su-err-c','su-err-t']);
+  if(!u||u.length<3){showErr('su-err-u','Username must be at least 3 characters.');return;}
+  if(!e||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){showErr('su-err-e','Please enter a valid email address.');return;}
+  if(p.length<=6){showErr('su-err-p','Password must be more than 6 characters.');return;}
+  if(p!==p2){showErr('su-err-p2','Passwords do not match.');return;}
+  if(!c){showErr('su-err-c','Please enter your invitation code.');return;}
+  if(c!=='XGU9KL'){showErr('su-err-c','Invalid invitation code. Please check and try again.');return;}
+  if(!t){showErr('su-err-t','Please accept the Terms & Conditions to continue.');return;}
   const users=JSON.parse(localStorage.getItem('a1g_users')||'[]');
-  if(users.find(x=>x.username===u)){alert('Username already taken. Please choose another.');return;}
-  // Save user
+  if(users.find(x=>x.username===u)){showErr('su-err-u','Username already taken. Please choose another.');return;}
   const phone=/^\+?\d[\d\s\-]{7,}$/.test(u)?u:'';
   users.push({username:u,email:e,password:p,phone});
   localStorage.setItem('a1g_users',JSON.stringify(users));
@@ -1273,8 +1280,12 @@ window.addEventListener('load', function(){
 </script>
 <!-- CUSTOMER CARE POPUP -->
 <div class="cc-overlay" id="cc-overlay" onclick="closeCC()"></div>
+<div class="cc-overlay" id="cc-overlay" onclick="closeCC()"></div>
 <div class="cc-popup" id="cc-popup">
-  <div class="cc-popup-title">Contact Customer Care</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+    <div class="cc-popup-title" style="margin-bottom:0;">Contact Customer Care</div>
+    <button onclick="closeCC()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#999;">✕</button>
+  </div>
   <a class="cc-option" href="https://t.me/YOURCHANNEL" target="_blank">
     <div class="cc-option-icon" style="background:#e8f4fd;">✈️</div>
     <div>
