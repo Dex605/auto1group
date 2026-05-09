@@ -463,6 +463,7 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
     <div class="lbtns">
       <button class="bgold" onclick="goTo('page-signin')">Sign In</button>
       <button class="bghost" onclick="goTo('page-signup')">Sign Up</button>
+      <button onclick="openCC()" style="width:44px;height:44px;border-radius:50%;background:#1a73e8;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:#fff;letter-spacing:1px;box-shadow:0 4px 14px rgba(0,0,0,0.25);font-family:'Barlow Condensed',sans-serif;flex-shrink:0;">CS</button>
     </div>
     <div style="margin-top:2rem;">
       <button class="abt-btn" onclick="var a=document.getElementById('land-about');a.style.display=a.style.display==='none'?'block':'none';if(a.style.display==='block')setTimeout(()=>a.scrollIntoView({behavior:'smooth'}),50);">About us <span class="abt-arr">›</span></button>
@@ -1082,7 +1083,7 @@ function afterLogin(){
   document.getElementById('ic2').textContent='HLKE25';
   document.getElementById('pu').textContent=n;
   document.getElementById('pp').textContent=cUser.phone||'—';
-  walletBal=100;
+  walletBal=0;
   // Build all 40 cars as pending from the start
   recs=[];
   const commRate=0.048;
@@ -1166,6 +1167,10 @@ function pickCar(idx){
 }
 
 function doMatch(){
+  if(walletBal<=0){
+    alert('You need funds in your wallet to start matching. Please contact customer care to deposit.');
+    return;
+  }
   if(mCount>=33&&!depUnlocked){document.getElementById('dreq').style.display='flex';return;}
   if(mCount>=40){alert('All 40 matches completed for today!');return;}
   const carIdx=mCount%CARS.length;
