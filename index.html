@@ -429,7 +429,7 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
 .rfv{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--orange);}
 
 /* CUSTOMER CARE BUTTON */
-.cc-btn{position:absolute;top:18px;right:18px;width:44px;height:44px;border-radius:50%;background:var(--orange);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:0 4px 14px rgba(0,0,0,0.25);z-index:10;}
+.cc-btn{position:absolute;top:18px;right:18px;width:44px;height:44px;border-radius:50%;background:#1a73e8;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:#fff;letter-spacing:1px;box-shadow:0 4px 14px rgba(0,0,0,0.25);z-index:10;font-family:'Barlow Condensed',sans-serif;}
 .ferr{display:none;color:#e53e3e;font-size:0.78rem;margin-top:4px;padding-left:2px;}
 .cc-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:998;}
 .cc-overlay.show{display:block;}
@@ -523,7 +523,7 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
 <!-- SIGN IN -->
 <div id="page-signin" class="page">
   <div class="abg"><img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1200" alt=""></div>
-  <button class="cc-btn" onclick="openCC()">💬</button>
+  <button class="cc-btn" onclick="openCC()">CS</button>
   <div class="awrap">
     <div class="acard">
       <div class="alogo">
@@ -556,7 +556,7 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
 <!-- SIGN UP -->
 <div id="page-signup" class="page">
   <div class="abg"><img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1200" alt=""></div>
-  <button class="cc-btn" onclick="openCC()">💬</button>
+  <button class="cc-btn" onclick="openCC()">CS</button>
   <div class="awrap awrap-top">
     <div class="acard">
       <div class="alogo">
@@ -1272,21 +1272,31 @@ window.addEventListener('load', function(){
 </script>
 <!-- CUSTOMER CARE POPUP -->
 <div class="cc-overlay" id="cc-overlay" onclick="closeCC()"></div>
-<div class="cc-overlay" id="cc-overlay" onclick="closeCC()"></div>
 <div class="cc-popup" id="cc-popup">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
     <div class="cc-popup-title" style="margin-bottom:0;">Contact Customer Care</div>
     <button onclick="closeCC()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#999;">✕</button>
   </div>
   <a class="cc-option" href="https://t.me/YOURCHANNEL" target="_blank">
-    <div class="cc-option-icon" style="background:#e8f4fd;">✈️</div>
+    <div class="cc-option-icon" style="background:#e8f4fd;">
+      <svg width="30" height="30" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="24" fill="#29B6F6"/>
+        <path d="M10.5 23.5l5.8 2.2 2.2 7.1c.15.47.74.63 1.1.3l3.1-2.7a1 1 0 011.2-.05l5.6 4.1c.42.3 1 .07 1.12-.43l4.9-19.6c.14-.55-.4-1.02-.93-.82L10.5 21.9c-.6.22-.6 1.05 0 1.6z" fill="white"/>
+        <path d="M18.3 25.7l-.6 5.5c0 .3.35.45.55.23l2.7-2.6" fill="#B0BEC5"/>
+      </svg>
+    </div>
     <div>
       <div class="cc-option-text">Telegram</div>
       <div class="cc-option-sub">Chat with us on Telegram</div>
     </div>
   </a>
   <a class="cc-option" href="https://wa.me/YOURNUMBER" target="_blank">
-    <div class="cc-option-icon" style="background:#e8f8ef;">💬</div>
+    <div class="cc-option-icon" style="background:#e8f8ef;">
+      <svg width="30" height="30" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="24" cy="24" r="24" fill="#25D366"/>
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M34 13.9A14.1 14.1 0 0010 29.5L8 40l10.8-2.8A14.1 14.1 0 0034 13.9zM24 36.2a11.7 11.7 0 01-6-1.65l-.43-.26-4.45 1.17 1.18-4.33-.28-.45A11.7 11.7 0 1124 36.2zm6.4-8.8c-.35-.18-2.07-1.02-2.39-1.14-.32-.12-.55-.18-.78.18-.23.35-.9 1.14-1.1 1.37-.2.23-.4.26-.75.09-.35-.18-1.48-.55-2.82-1.74-1.04-.93-1.75-2.08-1.95-2.43-.2-.35-.02-.54.15-.71.16-.16.35-.41.53-.62.17-.2.23-.35.35-.58.12-.23.06-.44-.03-.62-.09-.18-.78-1.88-1.07-2.57-.28-.68-.57-.58-.78-.59h-.67c-.23 0-.6.09-.92.44-.32.35-1.2 1.17-1.2 2.86 0 1.69 1.23 3.32 1.4 3.55.18.23 2.42 3.7 5.87 5.19.82.35 1.46.56 1.96.72.82.26 1.57.22 2.16.13.66-.1 2.04-.83 2.32-1.64.29-.8.29-1.49.2-1.63-.08-.15-.3-.23-.64-.4z" fill="white"/>
+      </svg>
+    </div>
     <div>
       <div class="cc-option-text">WhatsApp</div>
       <div class="cc-option-sub">Chat with us on WhatsApp</div>
