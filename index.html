@@ -524,7 +524,6 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
 <!-- SIGN IN -->
 <div id="page-signin" class="page">
   <div class="abg"><img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1200" alt=""></div>
-  <button class="cc-btn" onclick="openCC()">CS</button>
   <div class="awrap">
     <div class="acard">
       <div class="alogo">
@@ -547,7 +546,10 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
         <span class="ferr" id="si-err-p"></span>
       </div>
       <span class="ferr" id="si-err-g" style="margin-bottom:8px;"></span>
-      <button class="bauth" onclick="doSignIn()">Log In</button>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="bauth" onclick="doSignIn()" style="flex:1;margin:0;">Log In</button>
+        <button onclick="openCC()" style="width:48px;height:48px;border-radius:50%;background:#1a73e8;border:none;cursor:pointer;font-size:0.75rem;font-weight:800;color:#fff;letter-spacing:1px;box-shadow:0 4px 14px rgba(0,0,0,0.25);font-family:'Barlow Condensed',sans-serif;flex-shrink:0;">CS</button>
+      </div>
       <div class="aswitch">Don't have an account? <a onclick="goTo('page-signup')">Sign Up</a></div>
       <div class="aback"><a onclick="goTo('page-landing')">← Back to Home</a></div>
     </div>
@@ -557,7 +559,6 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
 <!-- SIGN UP -->
 <div id="page-signup" class="page">
   <div class="abg"><img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1200" alt=""></div>
-  <button class="cc-btn" onclick="openCC()">CS</button>
   <div class="awrap awrap-top">
     <div class="acard">
       <div class="alogo">
@@ -576,7 +577,10 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
         <label for="su-t">I agree to the <a onclick="showTerms()">Terms &amp; Conditions</a></label>
       </div>
       <span class="ferr" id="su-err-t"></span>
-      <button class="bauth" onclick="doSignUp()">Sign Up</button>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="bauth" onclick="doSignUp()" style="flex:1;margin:0;">Sign Up</button>
+        <button onclick="openCC()" style="width:48px;height:48px;border-radius:50%;background:#1a73e8;border:none;cursor:pointer;font-size:0.75rem;font-weight:800;color:#fff;letter-spacing:1px;box-shadow:0 4px 14px rgba(0,0,0,0.25);font-family:'Barlow Condensed',sans-serif;flex-shrink:0;">CS</button>
+      </div>
       <div class="aswitch">Already have an account? <a onclick="goTo('page-signin')">Sign In</a></div>
       <div class="aback"><a onclick="goTo('page-landing')">← Back to Home</a></div>
     </div>
@@ -1168,7 +1172,7 @@ function pickCar(idx){
 
 function doMatch(){
   if(walletBal<=0){
-    alert('You need funds in your wallet to start matching. Please contact customer care to deposit.');
+    document.getElementById('no-funds-popup').style.display='flex';
     return;
   }
   if(mCount>=33&&!depUnlocked){document.getElementById('dreq').style.display='flex';return;}
@@ -1278,9 +1282,12 @@ window.addEventListener('load', function(){
 <!-- CUSTOMER CARE POPUP -->
 <div class="cc-overlay" id="cc-overlay" onclick="closeCC()"></div>
 <div class="cc-popup" id="cc-popup">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
     <div class="cc-popup-title" style="margin-bottom:0;">Contact Customer Care</div>
     <button onclick="closeCC()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#999;">✕</button>
+  </div>
+  <div id="cc-deposit-msg" style="display:none;background:#fff3e0;border-left:4px solid #e07b2a;padding:10px 12px;border-radius:8px;font-size:0.82rem;color:#7a4000;margin-bottom:0.8rem;">
+    💰 Your wallet is empty. Please contact customer care to deposit funds and start matching.
   </div>
   <a class="cc-option" href="https://t.me/YOURCHANNEL" target="_blank">
     <div class="cc-option-icon" style="background:#e8f4fd;">
@@ -1311,6 +1318,8 @@ window.addEventListener('load', function(){
 
 <script>
 function openCC(){
+  const msg=document.getElementById('cc-deposit-msg');
+  if(msg) msg.style.display=walletBal<=0?'block':'none';
   document.getElementById('cc-popup').classList.add('show');
   document.getElementById('cc-overlay').classList.add('show');
 }
@@ -1319,5 +1328,15 @@ function closeCC(){
   document.getElementById('cc-overlay').classList.remove('show');
 }
 </script>
+<!-- NO FUNDS POPUP -->
+<div id="no-funds-popup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:1.5rem;width:88%;max-width:340px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="font-size:2rem;margin-bottom:0.5rem;">⚠️</div>
+    <div style="font-weight:700;font-size:1rem;color:#1a1a1a;margin-bottom:0.5rem;">Insufficient Funds</div>
+    <div style="font-size:0.85rem;color:#555;margin-bottom:1.2rem;line-height:1.6;">You need funds in your wallet to start matching. Please contact customer care to make a deposit.</div>
+    <button onclick="document.getElementById('no-funds-popup').style.display='none';openCC();" style="width:100%;padding:12px;background:#1a73e8;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:0.95rem;cursor:pointer;margin-bottom:0.6rem;">💬 Contact Customer Care</button>
+    <button onclick="document.getElementById('no-funds-popup').style.display='none';" style="width:100%;padding:10px;background:#f0f0f0;color:#555;border:none;border-radius:10px;font-weight:600;font-size:0.9rem;cursor:pointer;">OK</button>
+  </div>
+</div>
 </body>
 </html>
