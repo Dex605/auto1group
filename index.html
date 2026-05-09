@@ -159,8 +159,8 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
   box-shadow:0 10px 28px rgba(0,0,0,0.22),0 0 0 2.5px var(--gold);
   transform:translateY(-10px);
 }
-.farea{padding:0;display:flex;justify-content:center;overflow:hidden;background:#f0f0f0;height:360px;}
-.fwrap{width:100%;max-width:100%;text-align:center;position:relative;margin:0 auto;overflow:hidden;height:360px;}
+.farea{padding:0;display:flex;justify-content:center;overflow:hidden;background:#f0f0f0;height:520px;}
+.fwrap{width:100%;max-width:100%;text-align:center;position:relative;margin:0 auto;overflow:hidden;height:520px;}
 .fcar{width:80%;height:100%;object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 20px 40px rgba(0,0,0,0.30));transform:translateX(0);}
 .fshad{width:240px;height:18px;background:radial-gradient(ellipse,rgba(0,0,0,0.28) 0%,transparent 75%);border-radius:50%;margin:0 auto;filter:blur(5px);}
 
@@ -1122,24 +1122,7 @@ function updateWallet(){
 
 let slideshowTimer = null;
 
-function startSlideshow(){
-  stopSlideshow();
-  slideshowTimer = setInterval(()=>{
-    const thumbs = document.querySelectorAll('.cth');
-    let current = 0;
-    thumbs.forEach((t,i)=>{ if(t.classList.contains('active')) current=i; });
-    const next = (current+1) % CARS.length;
-    pickCar(next);
-    const nextThumb = thumbs[next];
-    if(nextThumb){
-      const container=document.getElementById('cthumbs');
-      const thumbLeft=nextThumb.offsetLeft;
-      const thumbW=nextThumb.offsetWidth;
-      const containerW=container.offsetWidth;
-      container.scrollTo({left:thumbLeft-(containerW/2)+(thumbW/2),behavior:'smooth'});
-    }
-  }, 4000);
-}
+function startSlideshow(){ /* disabled - cars change on MATCH click only */ }
 
 function stopSlideshow(){
   if(slideshowTimer){ clearInterval(slideshowTimer); slideshowTimer=null; }
@@ -1197,7 +1180,16 @@ function doMatch(){
   document.getElementById('pcnt').textContent=mCount+' / 40';
   updateWallet();
   renderRecs();
-  pickCar(carIdx);
+  // Show next car
+  const nextIdx=mCount%CARS.length;
+  pickCar(nextIdx);
+  // Scroll thumbnail to next car
+  const thumbs=document.querySelectorAll('.cth');
+  const nextThumb=thumbs[nextIdx];
+  if(nextThumb){
+    const container=document.getElementById('cthumbs');
+    container.scrollTo({left:nextThumb.offsetLeft-(container.offsetWidth/2)+(nextThumb.offsetWidth/2),behavior:'smooth'});
+  }
   if(mCount>=33&&!depUnlocked){setTimeout(()=>{document.getElementById('dreq').style.display='flex';},200);}
 }
 
