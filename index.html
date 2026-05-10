@@ -533,8 +533,8 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
       <div class="atitle">Welcome Back</div>
       <div class="asub">Sign in to your Auto1 Group account</div>
       <div class="fg">
-        <label class="fl">Username or Phone Number</label>
-        <input class="fi" type="text" id="si-u" placeholder="Enter username or phone number">
+        <label class="fl">Email Address or Phone Number</label>
+        <input class="fi" type="text" id="si-u" placeholder="Enter email or phone number">
         <span class="ferr" id="si-err-u"></span>
       </div>
       <div class="fg">
@@ -569,6 +569,63 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
       <div class="asub">Join Auto1 Group today</div>
       <div class="fg"><label class="fl">Username</label><input class="fi" type="text" id="su-u" placeholder="Enter username (min 3 characters)"><span class="ferr" id="su-err-u"></span></div>
       <div class="fg"><label class="fl">Email Address</label><input class="fi" type="email" id="su-e" placeholder="your@email.com"><span class="ferr" id="su-err-e"></span></div>
+      <div class="fg">
+        <label class="fl">Phone Number</label>
+        <div style="display:flex;gap:6px;">
+          <select id="su-cc" style="background:#1e2d45;color:#fff;border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;padding:0 8px;font-size:0.85rem;height:48px;min-width:110px;cursor:pointer;outline:none;">
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+254">🇰🇪 +254</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+91">🇮🇳 +91</option>
+            <option value="+27">🇿🇦 +27</option>
+            <option value="+234">🇳🇬 +234</option>
+            <option value="+233">🇬🇭 +233</option>
+            <option value="+255">🇹🇿 +255</option>
+            <option value="+256">🇺🇬 +256</option>
+            <option value="+251">🇪🇹 +251</option>
+            <option value="+212">🇲🇦 +212</option>
+            <option value="+20">🇪🇬 +20</option>
+            <option value="+49">🇩🇪 +49</option>
+            <option value="+33">🇫🇷 +33</option>
+            <option value="+39">🇮🇹 +39</option>
+            <option value="+34">🇪🇸 +34</option>
+            <option value="+31">🇳🇱 +31</option>
+            <option value="+46">🇸🇪 +46</option>
+            <option value="+47">🇳🇴 +47</option>
+            <option value="+45">🇩🇰 +45</option>
+            <option value="+358">🇫🇮 +358</option>
+            <option value="+48">🇵🇱 +48</option>
+            <option value="+7">🇷🇺 +7</option>
+            <option value="+86">🇨🇳 +86</option>
+            <option value="+81">🇯🇵 +81</option>
+            <option value="+82">🇰🇷 +82</option>
+            <option value="+65">🇸🇬 +65</option>
+            <option value="+60">🇲🇾 +60</option>
+            <option value="+62">🇮🇩 +62</option>
+            <option value="+63">🇵🇭 +63</option>
+            <option value="+66">🇹🇭 +66</option>
+            <option value="+84">🇻🇳 +84</option>
+            <option value="+92">🇵🇰 +92</option>
+            <option value="+880">🇧🇩 +880</option>
+            <option value="+94">🇱🇰 +94</option>
+            <option value="+971">🇦🇪 +971</option>
+            <option value="+966">🇸🇦 +966</option>
+            <option value="+961">🇱🇧 +961</option>
+            <option value="+90">🇹🇷 +90</option>
+            <option value="+98">🇮🇷 +98</option>
+            <option value="+55">🇧🇷 +55</option>
+            <option value="+52">🇲🇽 +52</option>
+            <option value="+54">🇦🇷 +54</option>
+            <option value="+57">🇨🇴 +57</option>
+            <option value="+56">🇨🇱 +56</option>
+            <option value="+51">🇵🇪 +51</option>
+            <option value="+61">🇦🇺 +61</option>
+            <option value="+64">🇳🇿 +64</option>
+          </select>
+          <input class="fi" type="tel" id="su-ph" placeholder="Phone number" style="flex:1;">
+        </div>
+        <span class="ferr" id="su-err-ph"></span>
+      </div>
       <div class="fg"><label class="fl">Password</label><div class="fw"><input class="fi pt" type="password" id="su-p" placeholder="More than 6 characters"><button class="eye" onclick="eyeT('su-p',this)">👁</button></div><span class="ferr" id="su-err-p"></span></div>
       <div class="fg"><label class="fl">Confirm Password</label><div class="fw"><input class="fi pt" type="password" id="su-p2" placeholder="Confirm your password"><button class="eye" onclick="eyeT('su-p2',this)">👁</button></div><span class="ferr" id="su-err-p2"></span></div>
       <div class="fg"><label class="fl">Invitation Code</label><input class="fi" type="text" id="su-c" placeholder="Enter invitation code" style="text-transform:uppercase;letter-spacing:3px;"><span class="ferr" id="su-err-c"></span></div>
@@ -1041,15 +1098,15 @@ function doSignIn(){
   const u=document.getElementById('si-u').value.trim();
   const p=document.getElementById('si-p').value;
   clearErrs(['si-err-u','si-err-p','si-err-g']);
-  const isPhone=/^\+?\d[\d\s\-]{7,}$/.test(u);
-  const isUsername=u.length>=3;
-  if(!u){showErr('si-err-u','Please enter your username or phone number.');return;}
-  if(!isPhone&&!isUsername){showErr('si-err-u','Username must be at least 3 characters, or enter a valid phone number.');return;}
+  const isPhone=/^\+?\d[\d\s\-]{6,}$/.test(u);
+  const isEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(u);
+  if(!u){showErr('si-err-u','Please enter your email address or phone number.');return;}
+  if(!isPhone&&!isEmail){showErr('si-err-u','Please enter a valid email address or phone number.');return;}
   if(!p){showErr('si-err-p','Please enter your password.');return;}
   if(p.length<=6){showErr('si-err-p','Password must be more than 6 characters.');return;}
   const users=JSON.parse(localStorage.getItem('a1g_users')||'[]');
-  const found=users.find(x=>(x.username===u||x.phone===u)&&x.password===p);
-  if(!found){showErr('si-err-g','Incorrect username or password. Please try again.');return;}
+  const found=users.find(x=>(x.email===u||x.phone===u)&&x.password===p);
+  if(!found){showErr('si-err-g','Incorrect email/phone or password. Please try again.');return;}
   cUser={username:found.username,email:found.email,phone:found.phone};
   afterLogin();
 }
@@ -1057,13 +1114,16 @@ function doSignIn(){
 function doSignUp(){
   const u=document.getElementById('su-u').value.trim();
   const e=document.getElementById('su-e').value.trim();
+  const cc=document.getElementById('su-cc').value;
+  const ph=document.getElementById('su-ph').value.trim();
   const p=document.getElementById('su-p').value;
   const p2=document.getElementById('su-p2').value;
   const c=document.getElementById('su-c').value.trim().toUpperCase();
   const t=document.getElementById('su-t').checked;
-  clearErrs(['su-err-u','su-err-e','su-err-p','su-err-p2','su-err-c','su-err-t']);
+  clearErrs(['su-err-u','su-err-e','su-err-ph','su-err-p','su-err-p2','su-err-c','su-err-t']);
   if(!u||u.length<3){showErr('su-err-u','Username must be at least 3 characters.');return;}
   if(!e||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){showErr('su-err-e','Please enter a valid email address.');return;}
+  if(!ph||!/^\d{6,}$/.test(ph.replace(/\s/g,''))){showErr('su-err-ph','Please enter a valid phone number.');return;}
   if(p.length<=6){showErr('su-err-p','Password must be more than 6 characters.');return;}
   if(p!==p2){showErr('su-err-p2','Passwords do not match.');return;}
   if(!c){showErr('su-err-c','Please enter your invitation code.');return;}
@@ -1071,10 +1131,10 @@ function doSignUp(){
   if(!t){showErr('su-err-t','Please accept the Terms & Conditions to continue.');return;}
   const users=JSON.parse(localStorage.getItem('a1g_users')||'[]');
   if(users.find(x=>x.username===u)){showErr('su-err-u','Username already taken. Please choose another.');return;}
-  const phone=/^\+?\d[\d\s\-]{7,}$/.test(u)?u:'';
-  users.push({username:u,email:e,password:p,phone});
+  const fullPhone=cc+ph;
+  users.push({username:u,email:e,password:p,phone:fullPhone});
   localStorage.setItem('a1g_users',JSON.stringify(users));
-  cUser={username:u,email:e,phone};
+  cUser={username:u,email:e,phone:fullPhone};
   afterLogin();
 }
 
@@ -1289,7 +1349,7 @@ window.addEventListener('load', function(){
   <div id="cc-deposit-msg" style="display:none;background:#fff3e0;border-left:4px solid #e07b2a;padding:10px 12px;border-radius:8px;font-size:0.82rem;color:#7a4000;margin-bottom:0.8rem;">
     💰 Your wallet is empty. Please contact customer care to deposit funds and start matching.
   </div>
-  <a class="cc-option" href="https://t.me/YOURCHANNEL" target="_blank">
+  <a class="cc-option" href="https://t.me/+18287413445" target="_blank">
     <div class="cc-option-icon" style="background:#e8f4fd;">
       <svg width="30" height="30" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <circle cx="24" cy="24" r="24" fill="#29B6F6"/>
@@ -1302,7 +1362,7 @@ window.addEventListener('load', function(){
       <div class="cc-option-sub">Chat with us on Telegram</div>
     </div>
   </a>
-  <a class="cc-option" href="https://wa.me/YOURNUMBER" target="_blank">
+  <a class="cc-option" href="https://wa.me/447478442814" target="_blank">
     <div class="cc-option-icon" style="background:#e8f8ef;">
       <svg width="30" height="30" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
         <circle cx="24" cy="24" r="24" fill="#25D366"/>
