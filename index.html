@@ -1340,10 +1340,12 @@ function scrollAbout(){document.getElementById('about-sec').scrollIntoView({beha
   </div>
 </div>
 
+<script>
 // Show landing popup on page load
 window.addEventListener('load', function(){
   setTimeout(function(){ document.getElementById('land-popup').style.display='flex'; }, 800);
 });
+</script>
 
 <!-- CUSTOMER CARE POPUP -->
 <div class="cc-overlay" id="cc-overlay" onclick="closeCC()"></div>
@@ -1382,6 +1384,7 @@ window.addEventListener('load', function(){
   </a>
 </div>
 
+<script>
 function savePaymentWallet(){
   const w=document.getElementById('pm-wallet').value.trim();
   const a=document.getElementById('pm-address').value.trim();
