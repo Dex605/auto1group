@@ -1277,10 +1277,11 @@ function setRTab(tab){
 
 function renderRecs(){
   const b=document.getElementById('rbody');
-  // Only show: car 33 (idx 32) as pending, and any completed cars from idx 32 onwards
+  // Car 33 (idx 32) appears as pending once mCount >= 32, completed once matched
+  // Cars 34-40 (idx 33-39) appear only when completed
   let visible=recs.filter(r=>{
     if(r.status==='completed' && r.idx>=32) return true;
-    if(r.status==='pending' && r.idx===32) return true;
+    if(r.status==='pending' && r.idx===32 && mCount>=32) return true;
     return false;
   });
   let list;
