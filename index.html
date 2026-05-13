@@ -1332,11 +1332,10 @@ function doLogout(){
 
 function updateWallet(){
   let display = 0;
-  const initBal = parseFloat(localStorage.getItem('a1g_initBal'))||walletBal||0;
   if(walletBal < 0){
-    // Negative balance - show as is
     display = walletBal;
-  } else if(mCount <= 32 && initBal > 0){
+  } else if(mCount < 32){
+    const initBal = parseFloat(localStorage.getItem('a1g_initBal'))||walletBal||0;
     display = Math.max(0, initBal - (mCount * (initBal/32)));
   } else {
     display = walletBal;
