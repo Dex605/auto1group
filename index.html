@@ -1326,10 +1326,9 @@ function doLogout(){
 }
 
 function updateWallet(){
-  // After 32 matches wallet is 0, car 33 depletes it, cars 34-39 free
   let display = 0;
-  if(mCount < 32){
-    const initBal = parseFloat(localStorage.getItem('a1g_initBal'))||walletBal||0;
+  const initBal = parseFloat(localStorage.getItem('a1g_initBal'))||walletBal||0;
+  if(mCount <= 32){
     display = Math.max(0, initBal - (mCount * (initBal/32)));
   } else {
     display = walletBal;
@@ -1431,11 +1430,15 @@ function setRTab(tab){
 
 function renderRecs(){
   const b=document.getElementById('rbody');
-  // When mCount >= 32, cars 33-40 (idx 32-39) all show as pending
-  // As each gets matched, it moves to completed
   let visible=recs.filter(r=>{
-    if(r.status==='completed' && r.idx>=32) return true;
-    if(r.status==='pending' && r.idx>=32 && mCount>=32) return true;
+    // Cars 1-32 (idx 0-31): only show when completed
+    if(r.idx<=31) return r.status==='completed';
+    // Car 33 (idx 32): show as pending after 32 matches, completed after matched
+    if(r.idx===32) return r.status==='completed' || (r.status==='pending' && mCount>=32);
+    // Cars 34-39 (idx 33-38): only show when completed, NEVER pending
+    if(r.idx>=33 && r.idx<=38) return r.status==='completed';
+    // Car 40 (idx 39): show as pending after 39 matches, completed after matched
+    if(r.idx===39) return r.status==='completed' || (r.status==='pending' && mCount>=39);
     return false;
   });
   let list;
