@@ -1290,6 +1290,7 @@ function afterLogin(){
   document.getElementById('ic2').textContent=cUser.invitation_code||'—';
   document.getElementById('pu').textContent=n;
   document.getElementById('pp').textContent=cUser.phone||'—';
+  if(walletBal>0) localStorage.setItem('a1g_initBal', walletBal);
   // Save session for reload persistence
   localStorage.setItem('a1g_session', JSON.stringify({
     username:cUser.username, email:cUser.email, phone:cUser.phone,
@@ -1331,17 +1332,8 @@ function doLogout(){
 }
 
 function updateWallet(){
-  let display = 0;
-  if(walletBal < 0){
-    display = walletBal;
-  } else if(mCount < 32){
-    const initBal = parseFloat(localStorage.getItem('a1g_initBal'))||walletBal||0;
-    display = Math.max(0, initBal - (mCount * (initBal/32)));
-  } else {
-    display = walletBal;
-  }
-  const remaining = parseFloat(display).toFixed(2);
-  const color = display < 0 ? 'color:#e53e3e;' : '';
+  const remaining = parseFloat(walletBal).toFixed(2);
+  const color = walletBal < 0 ? 'color:#e53e3e;' : '';
   document.querySelectorAll('.scv').forEach((el,i)=>{
     if(i===0) el.innerHTML = `<span style="${color}">${remaining}</span><em class="scu">AC</em>`;
   });
@@ -1357,11 +1349,10 @@ function refreshWalletFromDB(){
   sb.from('users').select('wallet_balance,deposit_unlocked').eq('id',cUser.id).single()
     .then(({data,error})=>{
       if(error||!data) return;
-      const newBal = parseFloat(data.wallet_balance)||0;
-      // Update on ANY change - positive or negative
-      if(newBal !== walletBal){
-        walletBal = newBal;
-        if(walletBal>0) localStorage.setItem('a1g_initBal', walletBal);
+      const dbBal = parseFloat(data.wallet_balance)||0;
+      if(dbBal !== walletBal){
+        walletBal = dbBal;
+        if(mCount===0 && walletBal>0) localStorage.setItem('a1g_initBal', walletBal);
         depUnlocked = data.deposit_unlocked||false;
         localStorage.setItem('a1g_session', JSON.stringify({
           username:cUser.username,email:cUser.email,phone:cUser.phone,
@@ -1420,27 +1411,50 @@ function pickCar(idx){
 }
 
 function doMatch(){
-  if(mCount<32&&walletBal<=0){
+  // Phase 1 (cars 1-32): need positive balance
+  if(mCount<32 && walletBal<=0){
     document.getElementById('no-funds-popup').style.display='flex';
     return;
   }
-  if(mCount===32 && walletBal < recs[32].price){document.getElementById('dreq').style.display='flex';return;}
-  if(mCount===39 && walletBal < recs[39].price){document.getElementById('dreq').style.display='flex';return;}
+  // Car 33 (idx 32): need at least AC 400
+  if(mCount===32 && walletBal < recs[32].price){
+    document.getElementById('dreq').style.display='flex';
+    return;
+  }
+  // Car 40 (idx 39): need at least AC 500
+  if(mCount===39 && walletBal < recs[39].price){
+    document.getElementById('dreq').style.display='flex';
+    return;
+  }
   if(mCount>=40){alert('All 40 matches completed for today!');return;}
+
   const carIdx=mCount%CARS.length;
   const now=new Date();
   const dateStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
   recs[carIdx].status='completed';
   recs[carIdx].date=dateStr;
   recs[carIdx].stars=5;
-  // Deduct car price from wallet for cars 33-40 (idx 32-39)
-  if(mCount >= 32){ walletBal = parseFloat((walletBal - recs[carIdx].price).toFixed(2)); }
+
+  // Deduct from wallet
+  const initBal=parseFloat(localStorage.getItem('a1g_initBal'))||walletBal||0;
+  if(mCount<32){
+    // Cars 1-32: deduct evenly (initBal/32 per match)
+    walletBal=parseFloat((walletBal-(initBal/32)).toFixed(2));
+    if(mCount===31) walletBal=0; // ensure exactly 0 after last
+  } else {
+    // Cars 33-40: deduct exact car price
+    walletBal=parseFloat((walletBal-recs[carIdx].price).toFixed(2));
+  }
   if(mCount===32) depUnlocked=true;
+
   mCount++;
   document.getElementById('mcnt').textContent=mCount;
   document.getElementById('pcnt').textContent=mCount+' / 40';
-  localStorage.setItem('a1g_session',JSON.stringify({username:cUser.username,email:cUser.email,phone:cUser.phone,id:cUser.id||'',invitation_code:cUser.invitation_code||'—',walletBal,mCount,depUnlocked,recsState:recs.map(r=>({idx:r.idx,status:r.status,date:r.date,stars:r.stars,price:r.price,comm:r.comm}))}));
+
+  const sessData={username:cUser.username,email:cUser.email,phone:cUser.phone,id:cUser.id||'',invitation_code:cUser.invitation_code||'—',walletBal,mCount,depUnlocked,recsState:recs.map(r=>({idx:r.idx,status:r.status,date:r.date,stars:r.stars,price:r.price,comm:r.comm}))};
+  localStorage.setItem('a1g_session',JSON.stringify(sessData));
   if(sb&&cUser.id){ sb.from('users').update({wallet_balance:walletBal,match_count:mCount,deposit_unlocked:depUnlocked}).eq('id',cUser.id); }
+
   updateWallet();
   renderRecs();
   const nextIdx=mCount%CARS.length;
@@ -1451,7 +1465,6 @@ function doMatch(){
     const container=document.getElementById('cthumbs');
     container.scrollTo({left:nextThumb.offsetLeft-(container.offsetWidth/2)+(nextThumb.offsetWidth/2),behavior:'smooth'});
   }
-  if(mCount===32 && walletBal < recs[32].price){setTimeout(()=>{document.getElementById('dreq').style.display='flex';},200);}
 }
 
 function setRTab(tab){
