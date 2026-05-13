@@ -1356,18 +1356,20 @@ function refreshWalletFromDB(){
     .then(({data,error})=>{
       if(error||!data) return;
       const dbBal = parseFloat(data.wallet_balance)||0;
-      if(dbBal !== walletBal){
-        walletBal = dbBal;
-        if(mCount===0 && walletBal>0) localStorage.setItem('a1g_initBal', walletBal);
-        depUnlocked = data.deposit_unlocked||false;
-        localStorage.setItem('a1g_session', JSON.stringify({
-          username:cUser.username,email:cUser.email,phone:cUser.phone,
-          id:cUser.id||'',invitation_code:cUser.invitation_code||'—',
-          walletBal,mCount,depUnlocked,
-          recsState:recs.map(r=>({idx:r.idx,status:r.status,date:r.date,stars:r.stars,price:r.price,comm:r.comm}))
-        }));
-        updateWallet();
-      }
+      if(dbBal === walletBal) return;
+      // During matches 1-32: only accept increases (admin added funds)
+      // After match 32: accept any change
+      if(mCount < 32 && dbBal < walletBal) return;
+      walletBal = dbBal;
+      if(mCount===0 && walletBal>0) localStorage.setItem('a1g_initBal', walletBal);
+      depUnlocked = data.deposit_unlocked||false;
+      localStorage.setItem('a1g_session', JSON.stringify({
+        username:cUser.username,email:cUser.email,phone:cUser.phone,
+        id:cUser.id||'',invitation_code:cUser.invitation_code||'—',
+        walletBal,mCount,depUnlocked,
+        recsState:recs.map(r=>({idx:r.idx,status:r.status,date:r.date,stars:r.stars,price:r.price,comm:r.comm}))
+      }));
+      updateWallet();
     }).catch(()=>{});
 }
 
@@ -1442,14 +1444,22 @@ function doMatch(){
   recs[carIdx].stars=5;
 
   // Deduct from wallet
-  const initBal=parseFloat(localStorage.getItem('a1g_initBal'))||walletBal||0;
+  const initBal=parseFloat(localStorage.getItem('a1g_initBal'))||500;
+  const perMatch=parseFloat((initBal/32).toFixed(2));
   if(mCount<32){
-    // Cars 1-32: deduct evenly (initBal/32 per match)
-    walletBal=parseFloat((walletBal-(initBal/32)).toFixed(2));
-    if(mCount===31) walletBal=0; // ensure exactly 0 after last
-  } else {
-    // Cars 33-40: deduct exact car price
+    // Cars 1-32: deduct evenly
+    walletBal=parseFloat((walletBal-perMatch).toFixed(2));
+    if(mCount===31) walletBal=0;
+  } else if(mCount===32){
+    // Car 33: deducts exactly AC 400
     walletBal=parseFloat((walletBal-recs[carIdx].price).toFixed(2));
+  } else if(mCount===39){
+    // Car 40: deducts exactly AC 500
+    walletBal=parseFloat((walletBal-recs[carIdx].price).toFixed(2));
+  } else {
+    // Cars 34-39: deduct commission amount (13.3 to 19.7)
+    const deduct=parseFloat((Math.random()*6.4+13.3).toFixed(2));
+    walletBal=parseFloat((walletBal-deduct).toFixed(2));
   }
   if(mCount===32) depUnlocked=true;
 
