@@ -1313,11 +1313,16 @@ function afterLogin(){
   renderRecs();
   switchTab('page-home');
   updateWallet();
+  // Refresh wallet from Supabase every 30 seconds
+  if(window._walletRefreshTimer) clearInterval(window._walletRefreshTimer);
+  window._walletRefreshTimer = setInterval(refreshWalletFromDB, 30000);
   setTimeout(()=>{document.getElementById('popup').style.display='flex';},700);
 }
 
 function doLogout(){
-  stopSlideshow();cUser=null;mCount=0;recs=[];depUnlocked=false;subHist=[];walletBal=0;
+  stopSlideshow();
+  if(window._walletRefreshTimer) clearInterval(window._walletRefreshTimer);
+  cUser=null;mCount=0;recs=[];depUnlocked=false;subHist=[];walletBal=0;
   localStorage.removeItem('a1g_session');
   localStorage.removeItem('a1g_initBal');
   document.getElementById('mcnt').textContent='0';
@@ -1342,6 +1347,28 @@ function updateWallet(){
   });
   document.getElementById('dep-bal') && (document.getElementById('dep-bal').textContent=remaining);
   document.getElementById('with-bal') && (document.getElementById('with-bal').textContent=remaining);
+}
+
+function refreshWalletFromDB(){
+  if(!sb||!cUser||!cUser.id) return;
+  sb.from('users').select('wallet_balance,deposit_unlocked').eq('id',cUser.id).single()
+    .then(({data,error})=>{
+      if(error||!data) return;
+      const newBal = parseFloat(data.wallet_balance)||0;
+      // Only update if balance has increased (admin added funds)
+      if(newBal > walletBal){
+        walletBal = newBal;
+        localStorage.setItem('a1g_initBal', walletBal);
+        depUnlocked = data.deposit_unlocked||false;
+        localStorage.setItem('a1g_session', JSON.stringify({
+          username:cUser.username,email:cUser.email,phone:cUser.phone,
+          id:cUser.id||'',invitation_code:cUser.invitation_code||'—',
+          walletBal,mCount,depUnlocked,
+          recsState:recs.map(r=>({idx:r.idx,status:r.status,date:r.date,stars:r.stars,price:r.price,comm:r.comm}))
+        }));
+        updateWallet();
+      }
+    }).catch(()=>{});
 }
 
 let slideshowTimer = null;
