@@ -1326,10 +1326,15 @@ function doLogout(){
 }
 
 function updateWallet(){
-  const initBal = parseFloat(localStorage.getItem('a1g_initBal'))||walletBal||0;
-  const perMatch = mCount<32 ? (initBal/32) : 0;
-  const spent = Math.min(mCount * perMatch, initBal);
-  const remaining = Math.max(0, initBal - spent).toFixed(2);
+  // After 32 matches wallet is 0, car 33 depletes it, cars 34-39 free
+  let display = 0;
+  if(mCount < 32){
+    const initBal = parseFloat(localStorage.getItem('a1g_initBal'))||walletBal||0;
+    display = Math.max(0, initBal - (mCount * (initBal/32)));
+  } else {
+    display = walletBal;
+  }
+  const remaining = parseFloat(display).toFixed(2);
   document.querySelectorAll('.scv').forEach((el,i)=>{
     if(i===0) el.innerHTML = remaining + '<em class="scu">AC</em>';
   });
@@ -1386,38 +1391,36 @@ function pickCar(idx){
 }
 
 function doMatch(){
-  if(walletBal<=0){
+  if(mCount<32&&walletBal<=0){
     document.getElementById('no-funds-popup').style.display='flex';
     return;
   }
-  if(mCount>=33&&!depUnlocked){document.getElementById('dreq').style.display='flex';return;}
+  if(mCount===32&&!depUnlocked){document.getElementById('dreq').style.display='flex';return;}
   if(mCount>=40){alert('All 40 matches completed for today!');return;}
   const carIdx=mCount%CARS.length;
-  // Mark this car as completed
   const now=new Date();
   const dateStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
   recs[carIdx].status='completed';
   recs[carIdx].date=dateStr;
   recs[carIdx].stars=5;
+  // After match 32 (car 33), wallet becomes 0
+  if(mCount===32){ walletBal=0; depUnlocked=true; }
   mCount++;
   document.getElementById('mcnt').textContent=mCount;
   document.getElementById('pcnt').textContent=mCount+' / 40';
   localStorage.setItem('a1g_session',JSON.stringify({username:cUser.username,email:cUser.email,phone:cUser.phone,id:cUser.id||'',invitation_code:cUser.invitation_code||'—',walletBal,mCount,depUnlocked,recsState:recs.map(r=>({idx:r.idx,status:r.status,date:r.date,stars:r.stars,price:r.price,comm:r.comm}))}));
-  // Save progress to Supabase
   if(sb&&cUser.id){ sb.from('users').update({wallet_balance:walletBal,match_count:mCount,deposit_unlocked:depUnlocked}).eq('id',cUser.id); }
   updateWallet();
   renderRecs();
-  // Show next car
   const nextIdx=mCount%CARS.length;
   pickCar(nextIdx);
-  // Scroll thumbnail to next car
   const thumbs=document.querySelectorAll('.cth');
   const nextThumb=thumbs[nextIdx];
   if(nextThumb){
     const container=document.getElementById('cthumbs');
     container.scrollTo({left:nextThumb.offsetLeft-(container.offsetWidth/2)+(nextThumb.offsetWidth/2),behavior:'smooth'});
   }
-  if(mCount>=33&&!depUnlocked){setTimeout(()=>{document.getElementById('dreq').style.display='flex';},200);}
+  if(mCount===32&&!depUnlocked){setTimeout(()=>{document.getElementById('dreq').style.display='flex';},200);}
 }
 
 function setRTab(tab){
