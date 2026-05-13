@@ -1424,7 +1424,8 @@ function doMatch(){
     document.getElementById('no-funds-popup').style.display='flex';
     return;
   }
-  if(mCount===32&&!depUnlocked){document.getElementById('dreq').style.display='flex';return;}
+  if(mCount===32 && walletBal < recs[32].price){document.getElementById('dreq').style.display='flex';return;}
+  if(mCount===39 && walletBal < recs[39].price){document.getElementById('dreq').style.display='flex';return;}
   if(mCount>=40){alert('All 40 matches completed for today!');return;}
   const carIdx=mCount%CARS.length;
   const now=new Date();
@@ -1449,7 +1450,7 @@ function doMatch(){
     const container=document.getElementById('cthumbs');
     container.scrollTo({left:nextThumb.offsetLeft-(container.offsetWidth/2)+(nextThumb.offsetWidth/2),behavior:'smooth'});
   }
-  if(mCount===32&&!depUnlocked){setTimeout(()=>{document.getElementById('dreq').style.display='flex';},200);}
+  if(mCount===32 && walletBal < recs[32].price){setTimeout(()=>{document.getElementById('dreq').style.display='flex';},200);}
 }
 
 function setRTab(tab){
@@ -1596,7 +1597,7 @@ window.addEventListener('load', function(){
 
 <script>
 function doMatchCar(idx){
-  if(idx===32&&!depUnlocked){document.getElementById('dreq').style.display='flex';return;}
+  if((idx===32||idx===39) && walletBal < r.price){document.getElementById('dreq').style.display='flex';return;}
   const r=recs[idx];
   if(!r||r.status==='completed') return;
   if(walletBal<r.price){
