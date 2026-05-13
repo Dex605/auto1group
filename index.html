@@ -1151,7 +1151,12 @@ function closeSub(){const p=subHist.pop();if(p)goTo(p);else goTo('page-my');}
 
 function eyeT(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='🙈';}else{i.type='password';btn.textContent='👁';}}
 
-function showErr(id,msg){
+function genCode(){
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code='';
+  for(let i=0;i<6;i++) code+=chars.charAt(Math.floor(Math.random()*chars.length));
+  return code;
+}
   const el=document.getElementById(id);
   if(el){el.textContent=msg;el.style.display=msg?'block':'none';}
 }
@@ -1169,14 +1174,16 @@ function doSignIn(){
   if(p.length<=6){showErr('si-err-p','Password must be more than 6 characters.');return;}
   if(sb){
     showErr('si-err-g','Signing in...');
-    sb.from('users').select('*').or(`email.eq.${u},phone.eq.${u}`).eq('password',p).single()
+    sb.from('users').select('*').or(`email.eq.${u},phone.eq.${u}`)
       .then(({data,error})=>{
         clearErrs(['si-err-g']);
-        if(error||!data){showErr('si-err-g','Incorrect email/phone or password. Please try again.');return;}
-        cUser={username:data.username,email:data.email,phone:data.phone,id:data.id};
-        walletBal=parseFloat(data.wallet_balance)||0;
-        mCount=parseInt(data.match_count)||0;
-        depUnlocked=data.deposit_unlocked||false;
+        if(error||!data||data.length===0){showErr('si-err-g','No account found with that email or phone.');return;}
+        const found=data.find(x=>x.password===p);
+        if(!found){showErr('si-err-p','Incorrect password. Please try again.');return;}
+        cUser={username:found.username,email:found.email,phone:found.phone,id:found.id,invitation_code:found.invitation_code||'—'};
+        walletBal=parseFloat(found.wallet_balance)||0;
+        mCount=parseInt(found.match_count)||0;
+        depUnlocked=found.deposit_unlocked||false;
         afterLogin();
       }).catch(()=>{showErr('si-err-g','Connection error. Please try again.');});
   } else {
@@ -1210,22 +1217,23 @@ function doSignUp(){
   if(c!=='XGU9KL'){showErr('su-err-c','Invalid invitation code. Please check and try again.');return;}
   if(!t){showErr('su-err-t','Please accept the Terms & Conditions to continue.');return;}
   const fullPhone=cc+ph;
+  const myCode=genCode();
   if(sb){
     showErr('su-err-u','Creating account...');
-    sb.from('users').insert([{username:u,email:e,password:p,phone:fullPhone,wallet_balance:0,match_count:0,deposit_unlocked:false}]).select().single()
+    sb.from('users').insert([{username:u,email:e,password:p,phone:fullPhone,wallet_balance:0,match_count:0,deposit_unlocked:false,invitation_code:myCode}]).select().single()
       .then(({data,error})=>{
         clearErrs(['su-err-u']);
         if(error){showErr('su-err-u',error.code==='23505'?'Username already taken.':'Error: '+error.message);return;}
-        cUser={username:data.username,email:data.email,phone:data.phone,id:data.id};
+        cUser={username:data.username,email:data.email,phone:data.phone,id:data.id,invitation_code:data.invitation_code||myCode};
         walletBal=0; mCount=0; depUnlocked=false;
         afterLogin();
       }).catch(()=>{showErr('su-err-u','Connection error. Please try again.');});
   } else {
     const users=JSON.parse(localStorage.getItem('a1g_users')||'[]');
     if(users.find(x=>x.username===u)){showErr('su-err-u','Username already taken.');return;}
-    users.push({username:u,email:e,password:p,phone:fullPhone,wallet_balance:0,match_count:0,deposit_unlocked:false});
+    users.push({username:u,email:e,password:p,phone:fullPhone,wallet_balance:0,match_count:0,deposit_unlocked:false,invitation_code:myCode});
     localStorage.setItem('a1g_users',JSON.stringify(users));
-    cUser={username:u,email:e,phone:fullPhone};
+    cUser={username:u,email:e,phone:fullPhone,invitation_code:myCode};
     walletBal=0; mCount=0; depUnlocked=false;
     afterLogin();
   }
@@ -1237,7 +1245,7 @@ function afterLogin(){
   document.getElementById('un1').textContent=n;
   document.getElementById('av2').textContent=i;
   document.getElementById('un2').textContent=n;
-  document.getElementById('ic2').textContent='HLKE25';
+  document.getElementById('ic2').textContent=cUser.invitation_code||'—';
   document.getElementById('pu').textContent=n;
   document.getElementById('pp').textContent=cUser.phone||'—';
   // Build all 40 cars as pending
