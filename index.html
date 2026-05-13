@@ -1315,7 +1315,7 @@ function afterLogin(){
   updateWallet();
   // Refresh wallet from Supabase every 30 seconds
   if(window._walletRefreshTimer) clearInterval(window._walletRefreshTimer);
-  window._walletRefreshTimer = setInterval(refreshWalletFromDB, 30000);
+  window._walletRefreshTimer = setInterval(refreshWalletFromDB, 5000);
   setTimeout(()=>{document.getElementById('popup').style.display='flex';},700);
 }
 
@@ -1333,17 +1333,21 @@ function doLogout(){
 function updateWallet(){
   let display = 0;
   const initBal = parseFloat(localStorage.getItem('a1g_initBal'))||walletBal||0;
-  if(mCount <= 32){
+  if(walletBal < 0){
+    // Negative balance - show as is
+    display = walletBal;
+  } else if(mCount <= 32 && initBal > 0){
     display = Math.max(0, initBal - (mCount * (initBal/32)));
   } else {
     display = walletBal;
   }
   const remaining = parseFloat(display).toFixed(2);
+  const color = display < 0 ? 'color:#e53e3e;' : '';
   document.querySelectorAll('.scv').forEach((el,i)=>{
-    if(i===0) el.innerHTML = remaining + '<em class="scu">AC</em>';
+    if(i===0) el.innerHTML = `<span style="${color}">${remaining}</span><em class="scu">AC</em>`;
   });
   document.querySelectorAll('.ms-val,.msv').forEach((el,i)=>{
-    if(i===0) el.innerHTML = remaining + '<span class="ms-unit">AC</span>';
+    if(i===0) el.innerHTML = `<span style="${color}">${remaining}</span><span class="ms-unit">AC</span>`;
   });
   document.getElementById('dep-bal') && (document.getElementById('dep-bal').textContent=remaining);
   document.getElementById('with-bal') && (document.getElementById('with-bal').textContent=remaining);
@@ -1355,10 +1359,10 @@ function refreshWalletFromDB(){
     .then(({data,error})=>{
       if(error||!data) return;
       const newBal = parseFloat(data.wallet_balance)||0;
-      // Only update if balance has increased (admin added funds)
-      if(newBal > walletBal){
+      // Update on ANY change - positive or negative
+      if(newBal !== walletBal){
         walletBal = newBal;
-        localStorage.setItem('a1g_initBal', walletBal);
+        if(walletBal>0) localStorage.setItem('a1g_initBal', walletBal);
         depUnlocked = data.deposit_unlocked||false;
         localStorage.setItem('a1g_session', JSON.stringify({
           username:cUser.username,email:cUser.email,phone:cUser.phone,
