@@ -1157,6 +1157,7 @@ function genCode(){
   for(let i=0;i<6;i++) code+=chars.charAt(Math.floor(Math.random()*chars.length));
   return code;
 }
+function showErr(id,msg){
   const el=document.getElementById(id);
   if(el){el.textContent=msg;el.style.display=msg?'block':'none';}
 }
@@ -1171,31 +1172,46 @@ function doSignIn(){
   if(!u){showErr('si-err-u','Please enter your email address or phone number.');return;}
   if(!isPhone&&!isEmail){showErr('si-err-u','Please enter a valid email address or phone number.');return;}
   if(!p){showErr('si-err-p','Please enter your password.');return;}
-  if(p.length<=6){showErr('si-err-p','Password must be more than 6 characters.');return;}
+  if(p.length<6){showErr('si-err-p','Password must be at least 6 characters.');return;}
   if(sb){
     showErr('si-err-g','Signing in...');
-    sb.from('users').select('*').or(`email.eq.${u},phone.eq.${u}`)
-      .then(({data,error})=>{
-        clearErrs(['si-err-g']);
-        if(error||!data||data.length===0){showErr('si-err-g','No account found with that email or phone.');return;}
-        const found=data.find(x=>x.password===p);
-        if(!found){showErr('si-err-p','Incorrect password. Please try again.');return;}
-        cUser={username:found.username,email:found.email,phone:found.phone,id:found.id,invitation_code:found.invitation_code||'—'};
-        walletBal=parseFloat(found.wallet_balance)||0;
-        mCount=parseInt(found.match_count)||0;
-        depUnlocked=found.deposit_unlocked||false;
-        afterLogin();
+    // Query by email first, then phone if not found
+    sb.from('users').select('*').eq('email', u)
+      .then(({data:dataE, error:errE})=>{
+        const byEmail = (!errE && dataE && dataE.length > 0) ? dataE : [];
+        if(byEmail.length > 0){
+          processSignInResult(byEmail, p);
+        } else {
+          // Try by phone
+          sb.from('users').select('*').eq('phone', u)
+            .then(({data:dataP, error:errP})=>{
+              clearErrs(['si-err-g']);
+              if(errP||!dataP||dataP.length===0){showErr('si-err-g','No account found with that email or phone.');return;}
+              processSignInResult(dataP, p);
+            }).catch(()=>{showErr('si-err-g','Connection error. Please try again.');});
+        }
       }).catch(()=>{showErr('si-err-g','Connection error. Please try again.');});
   } else {
     const users=JSON.parse(localStorage.getItem('a1g_users')||'[]');
     const found=users.find(x=>(x.email===u||x.phone===u)&&x.password===p);
     if(!found){showErr('si-err-g','Incorrect email/phone or password. Please try again.');return;}
-    cUser={username:found.username,email:found.email,phone:found.phone};
+    cUser={username:found.username,email:found.email,phone:found.phone,invitation_code:found.invitation_code||'—'};
     walletBal=parseFloat(found.wallet_balance)||0;
     mCount=parseInt(found.match_count)||0;
     depUnlocked=found.deposit_unlocked||false;
     afterLogin();
   }
+}
+
+function processSignInResult(data, p){
+  clearErrs(['si-err-g']);
+  const found=data.find(x=>x.password===p);
+  if(!found){showErr('si-err-p','Incorrect password. Please try again.');return;}
+  cUser={username:found.username,email:found.email,phone:found.phone,id:found.id,invitation_code:found.invitation_code||'—'};
+  walletBal=parseFloat(found.wallet_balance)||0;
+  mCount=parseInt(found.match_count)||0;
+  depUnlocked=found.deposit_unlocked||false;
+  afterLogin();
 }
 
 function doSignUp(){
@@ -1211,7 +1227,7 @@ function doSignUp(){
   if(!u||u.length<3){showErr('su-err-u','Username must be at least 3 characters.');return;}
   if(!e||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){showErr('su-err-e','Please enter a valid email address.');return;}
   if(!ph||!/^\d{6,}$/.test(ph.replace(/\s/g,''))){showErr('su-err-ph','Please enter a valid phone number.');return;}
-  if(p.length<=6){showErr('su-err-p','Password must be more than 6 characters.');return;}
+  if(p.length<6){showErr('su-err-p','Password must be at least 6 characters.');return;}
   if(p!==p2){showErr('su-err-p2','Passwords do not match.');return;}
   if(!c){showErr('su-err-c','Please enter your invitation code.');return;}
   if(c!=='XGU9KL'){showErr('su-err-c','Invalid invitation code. Please check and try again.');return;}
@@ -1220,14 +1236,16 @@ function doSignUp(){
   const myCode=genCode();
   if(sb){
     showErr('su-err-u','Creating account...');
-    sb.from('users').insert([{username:u,email:e,password:p,phone:fullPhone,wallet_balance:0,match_count:0,deposit_unlocked:false,invitation_code:myCode}]).select().single()
+    sb.from('users').insert([{username:u,email:e,password:p,phone:fullPhone,wallet_balance:0,match_count:0,deposit_unlocked:false,invitation_code:myCode}])
+      .select('*').single()
       .then(({data,error})=>{
         clearErrs(['su-err-u']);
-        if(error){showErr('su-err-u',error.code==='23505'?'Username already taken.':'Error: '+error.message);return;}
-        cUser={username:data.username,email:data.email,phone:data.phone,id:data.id,invitation_code:data.invitation_code||myCode};
+        if(error){showErr('su-err-u',error.code==='23505'?'Username already taken. Please choose another.':'Error: '+error.message);return;}
+        const invCode = (data && data.invitation_code) ? data.invitation_code : myCode;
+        cUser={username:data.username,email:data.email,phone:data.phone,id:data.id,invitation_code:invCode};
         walletBal=0; mCount=0; depUnlocked=false;
         afterLogin();
-      }).catch(()=>{showErr('su-err-u','Connection error. Please try again.');});
+      }).catch((err)=>{showErr('su-err-u','Connection error. Please try again.');});
   } else {
     const users=JSON.parse(localStorage.getItem('a1g_users')||'[]');
     if(users.find(x=>x.username===u)){showErr('su-err-u','Username already taken.');return;}
