@@ -1433,8 +1433,9 @@ function doMatch(){
   recs[carIdx].status='completed';
   recs[carIdx].date=dateStr;
   recs[carIdx].stars=5;
-  // After match 32 (car 33), wallet becomes 0
-  if(mCount===32){ walletBal=0; depUnlocked=true; }
+  // Deduct car price from wallet for cars 33-40 (idx 32-39)
+  if(mCount >= 32){ walletBal = parseFloat((walletBal - recs[carIdx].price).toFixed(2)); }
+  if(mCount===32) depUnlocked=true;
   mCount++;
   document.getElementById('mcnt').textContent=mCount;
   document.getElementById('pcnt').textContent=mCount+' / 40';
