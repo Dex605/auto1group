@@ -1410,6 +1410,12 @@ function tFaq(el){const a=el.nextElementSibling,c=el.querySelector('.fc2');a.cla
 function showTerms(){document.getElementById('terms-modal').style.display='flex';}
 function hideTerms(){document.getElementById('terms-modal').style.display='none';}
 function scrollAbout(){document.getElementById('about-sec').scrollIntoView({behavior:'smooth'});}
+
+// Show landing popup on page load
+window.addEventListener('load', function(){
+  setTimeout(function(){ document.getElementById('land-popup').style.display='flex'; }, 800);
+});
+
 </script>
 
 <!-- LANDING PAGE POPUP -->
@@ -1432,13 +1438,6 @@ function scrollAbout(){document.getElementById('about-sec').scrollIntoView({beha
     </div>
   </div>
 </div>
-
-<script>
-// Show landing popup on page load
-window.addEventListener('load', function(){
-  setTimeout(function(){ document.getElementById('land-popup').style.display='flex'; }, 800);
-});
-</script>
 
 <!-- CUSTOMER CARE POPUP -->
 <div class="cc-overlay" id="cc-overlay" onclick="closeCC()"></div>
