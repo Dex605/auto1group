@@ -830,10 +830,9 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
     <div class="dr-ic">⚠️</div>
     <h3>Deposit Required</h3>
     <p>To continue with your remaining matches, please make a deposit to proceed.</p>
-    <div class="dr-amt">$50</div>
     <p style="font-size:0.78rem;color:#bbb;">Contact customer service to complete your deposit and unlock remaining matches.</p>
     <div class="dr-btns">
-      <button class="bdn" onclick="openSub('page-deposit');document.getElementById('dreq').style.display='none'">Deposit Now</button>
+      <button class="bdn" onclick="document.getElementById('dreq').style.display='none';openCC();">Contact Customer Service</button>
       <button class="bdc" onclick="document.getElementById('dreq').style.display='none'">Cancel</button>
     </div>
   </div>
@@ -1199,7 +1198,16 @@ function doSignIn(){
     walletBal=parseFloat(found.wallet_balance)||0;
     mCount=parseInt(found.match_count)||0;
     depUnlocked=found.deposit_unlocked||false;
+    const savedSess=localStorage.getItem('a1g_session');
+    let savedRecs=null;
+    if(savedSess){ try{ const s=JSON.parse(savedSess); if(s.username===found.username && s.recsState) savedRecs=s.recsState; }catch(e){} }
     afterLogin();
+    if(savedRecs && savedRecs.length===40){
+      savedRecs.forEach(saved=>{ if(recs[saved.idx]){ recs[saved.idx].status=saved.status; recs[saved.idx].date=saved.date; recs[saved.idx].stars=saved.stars; recs[saved.idx].price=saved.price; recs[saved.idx].comm=saved.comm; } });
+      renderRecs();
+    }
+    document.getElementById('mcnt').textContent=mCount;
+    document.getElementById('pcnt').textContent=mCount+' / 40';
   }
 }
 
@@ -1211,7 +1219,23 @@ function processSignInResult(data, p){
   walletBal=parseFloat(found.wallet_balance)||0;
   mCount=parseInt(found.match_count)||0;
   depUnlocked=found.deposit_unlocked||false;
+  // Check for saved recs in localStorage for this user
+  const savedSess=localStorage.getItem('a1g_session');
+  let savedRecs=null;
+  if(savedSess){
+    try{
+      const s=JSON.parse(savedSess);
+      if(s.username===found.username && s.recsState) savedRecs=s.recsState;
+    }catch(e){}
+  }
   afterLogin();
+  // Restore recs if available
+  if(savedRecs && savedRecs.length===40){
+    savedRecs.forEach(saved=>{ if(recs[saved.idx]){ recs[saved.idx].status=saved.status; recs[saved.idx].date=saved.date; recs[saved.idx].stars=saved.stars; recs[saved.idx].price=saved.price; recs[saved.idx].comm=saved.comm; } });
+    renderRecs();
+  }
+  document.getElementById('mcnt').textContent=mCount;
+  document.getElementById('pcnt').textContent=mCount+' / 40';
 }
 
 function doSignUp(){
@@ -1270,7 +1294,8 @@ function afterLogin(){
   localStorage.setItem('a1g_session', JSON.stringify({
     username:cUser.username, email:cUser.email, phone:cUser.phone,
     id:cUser.id||'', invitation_code:cUser.invitation_code||'—',
-    walletBal, mCount, depUnlocked
+    walletBal, mCount, depUnlocked,
+    recsState:recs.map(r=>({idx:r.idx,status:r.status,date:r.date,stars:r.stars,price:r.price,comm:r.comm}))
   }));
   // Save initial wallet balance for proper depletion
   if(walletBal>0) localStorage.setItem('a1g_initBal', walletBal);
@@ -1377,7 +1402,9 @@ function doMatch(){
   mCount++;
   document.getElementById('mcnt').textContent=mCount;
   document.getElementById('pcnt').textContent=mCount+' / 40';
-  localStorage.setItem('a1g_session',JSON.stringify({username:cUser.username,email:cUser.email,phone:cUser.phone,id:cUser.id||'',invitation_code:cUser.invitation_code||'—',walletBal,mCount,depUnlocked}));
+  localStorage.setItem('a1g_session',JSON.stringify({username:cUser.username,email:cUser.email,phone:cUser.phone,id:cUser.id||'',invitation_code:cUser.invitation_code||'—',walletBal,mCount,depUnlocked,recsState:recs.map(r=>({idx:r.idx,status:r.status,date:r.date,stars:r.stars,price:r.price,comm:r.comm}))}));
+  // Save progress to Supabase
+  if(sb&&cUser.id){ sb.from('users').update({wallet_balance:walletBal,match_count:mCount,deposit_unlocked:depUnlocked}).eq('id',cUser.id); }
   updateWallet();
   renderRecs();
   // Show next car
@@ -1454,7 +1481,6 @@ function scrollAbout(){document.getElementById('about-sec').scrollIntoView({beha
 // Show landing popup on page load
 window.addEventListener('load', function(){
   setTimeout(function(){ document.getElementById('land-popup').style.display='flex'; }, 800);
-  // Restore session if exists
   const sess=localStorage.getItem('a1g_session');
   if(sess){
     try{
@@ -1464,8 +1490,23 @@ window.addEventListener('load', function(){
       mCount=parseInt(s.mCount)||0;
       depUnlocked=s.depUnlocked||false;
       afterLogin();
+      // Restore match records state
+      if(s.recsState && s.recsState.length===40){
+        s.recsState.forEach(saved=>{
+          if(recs[saved.idx]){
+            recs[saved.idx].status=saved.status;
+            recs[saved.idx].date=saved.date;
+            recs[saved.idx].stars=saved.stars;
+            recs[saved.idx].price=saved.price;
+            recs[saved.idx].comm=saved.comm;
+          }
+        });
+        renderRecs();
+      }
       document.getElementById('land-popup').style.display='none';
       document.getElementById('popup').style.display='none';
+      document.getElementById('mcnt').textContent=mCount;
+      document.getElementById('pcnt').textContent=mCount+' / 40';
     }catch(e){ localStorage.removeItem('a1g_session'); }
   }
 });
