@@ -1357,11 +1357,12 @@ function refreshWalletFromDB(){
       if(error||!data) return;
       const dbBal = parseFloat(data.wallet_balance)||0;
       if(dbBal === walletBal) return;
-      // During matches 1-32: only accept increases (admin added funds)
-      // After match 32: accept any change
+      // Only accept from Supabase if it's a genuine admin change
+      // (Supabase value differs from our locally tracked value)
+      // We trust local during active matching - only sync when Supabase is HIGHER
+      // or when waiting for deposit (mCount >= 32)
       if(mCount < 32 && dbBal < walletBal) return;
       walletBal = dbBal;
-      if(mCount===0 && walletBal>0) localStorage.setItem('a1g_initBal', walletBal);
       depUnlocked = data.deposit_unlocked||false;
       localStorage.setItem('a1g_session', JSON.stringify({
         username:cUser.username,email:cUser.email,phone:cUser.phone,
@@ -1469,7 +1470,10 @@ function doMatch(){
 
   const sessData={username:cUser.username,email:cUser.email,phone:cUser.phone,id:cUser.id||'',invitation_code:cUser.invitation_code||'—',walletBal,mCount,depUnlocked,recsState:recs.map(r=>({idx:r.idx,status:r.status,date:r.date,stars:r.stars,price:r.price,comm:r.comm}))};
   localStorage.setItem('a1g_session',JSON.stringify(sessData));
-  if(sb&&cUser.id){ sb.from('users').update({wallet_balance:walletBal,match_count:mCount,deposit_unlocked:depUnlocked}).eq('id',cUser.id); }
+  if(sb&&cUser.id){ 
+    sb.from('users').update({wallet_balance:walletBal,match_count:mCount,deposit_unlocked:depUnlocked}).eq('id',cUser.id)
+      .then(({error})=>{ if(error) console.error('Save failed:',error.message); });
+  }
 
   updateWallet();
   renderRecs();
