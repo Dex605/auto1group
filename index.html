@@ -686,7 +686,7 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;letter-spacing:3px;color:var(--navy);margin-left:5px;">GROUP</div>
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
-      <button class="icbtn">🎧</button>
+      <button class="icbtn">🚗</button>
       <button class="icbtn">👤</button>
     </div>
   </div>
@@ -784,14 +784,14 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
       <div class="lb" style="font-size:1.2rem;color:#fff;padding:3px 6px 3px 8px;">AUTO<span>1</span></div>
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;letter-spacing:3px;color:var(--navy);margin-left:5px;">GROUP</div>
     </div>
-    <button class="icbtn">🎧</button>
+    <button class="icbtn">🚗</button>
   </div>
   <div class="shdr">
     <div class="urow">
       <div class="av" id="av1">U</div>
       <div><div class="ugn">Hi, <span id="un1">User</span></div><div class="ugs">Welcome back</div></div>
     </div>
-    <button class="icbtn">🎧</button>
+    <button class="icbtn">🚗</button>
   </div>
   <div class="sgrid">
     <div class="sc"><div class="sch"><span class="scl">Wallet Balance</span><div class="sci">💳</div></div><div class="scv">0<em class="scu">AC</em></div><div class="scd">The total balance reflects both the deposited amount and profits earned</div></div>
@@ -842,7 +842,7 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
 <div id="page-records" class="page">
   <div class="tnav">
     <div class="tlogo"><div class="lb" style="font-size:1.2rem;color:#fff;padding:3px 6px 3px 8px;">AUTO<span>1</span></div><div style="font-family:'Barlow Condensed',sans-serif;font-size:1.2rem;letter-spacing:3px;color:var(--navy);margin-left:5px;">GROUP</div></div>
-    <button class="icbtn">🎧</button>
+    <button class="icbtn">🚗</button>
   </div>
   <div class="rtabs"><div class="rt active" id="rt-all" onclick="setRTab('all')">All</div><div class="rt" id="rt-pending" onclick="setRTab('pending')">Pending</div><div class="rt" id="rt-completed" onclick="setRTab('completed')">Completed</div></div>
   <div class="rbody" id="rbody"><div class="nodata">No more data...</div></div>
@@ -971,8 +971,8 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
 <div id="page-contact" class="page" style="padding-bottom:20px;">
   <div class="subhdr"><button class="subback" onclick="closeSub()">‹</button><span class="subtit">Contact Us</span><div class="subsp"></div></div>
   <div class="subbody">
-    <div class="cc2"><div class="ccic cs">🎧</div><div><div class="cctit">Online Customer Service</div><div class="ccsub">Chat with our support team</div></div></div>
-    <div class="cc2" onclick="window.open('https://wa.me/16465274020','_blank')"><div class="ccic wa">💬</div><div><div class="cctit">WhatsApp Support</div><div class="ccsub">+1 646-527-4020</div></div></div>
+    <div class="cc2" onclick="openCC()"><div class="ccic cs">💬</div><div><div class="cctit">Online Customer Service</div><div class="ccsub">Chat with our support team</div></div></div>
+    <div class="cc2" onclick="window.open('https://wa.me/447478442814','_blank')"><div class="ccic wa">💬</div><div><div class="cctit">WhatsApp Support</div><div class="ccsub">+44 7478 442814</div></div></div>
     <div class="cc2"><div class="ccic em">📧</div><div><div class="cctit">Email Support</div><div class="ccsub">support@auto1group.com</div></div></div>
     <div class="hbox"><h4>⏰ Support Hours</h4><p>Online Support Hours: 08:00 - 21:00<br>For any further questions, please contact Online Customer Service.<br>Our team is ready to assist you.</p></div>
   </div>
@@ -1313,7 +1313,7 @@ function afterLogin(){
     let price, comm;
     if(idx===32){ price=400; comm='15.60'; }
     else if(idx===39){ price=500; comm='19.70'; }
-    else { price=Math.floor(Math.random()*151)+350; comm=(Math.random()*3.9+15.9).toFixed(2); }
+    else { price=Math.floor(Math.random()*151)+350; comm=(Math.random()*0.7+15.2).toFixed(2); }
     recs.push({car,date:'—',status:'pending',price,comm,stars:0,idx});
   });
   buildSlideshow();
@@ -1607,7 +1607,7 @@ window.addEventListener('load', function(){
 
 <!-- CUSTOMER CARE POPUP -->
 <div class="cc-overlay" id="cc-overlay" onclick="closeCC()"></div>
-<div class="cc-popup" id="cc-popup">
+<div class="cc-popup" id="cc-popup" style="max-height:90vh;overflow-y:auto;">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
     <div class="cc-popup-title" style="margin-bottom:0;">Contact Customer Care</div>
     <button onclick="closeCC()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#999;">✕</button>
@@ -1617,16 +1617,24 @@ window.addEventListener('load', function(){
   </div>
   <a class="cc-option" href="https://wa.me/447478442814" target="_blank">
     <div class="cc-option-icon" style="background:#e8f8ef;">
-      <svg width="30" height="30" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="24" cy="24" r="24" fill="#25D366"/>
-        <path fill-rule="evenodd" clip-rule="evenodd" d="M34 13.9A14.1 14.1 0 0010 29.5L8 40l10.8-2.8A14.1 14.1 0 0034 13.9zM24 36.2a11.7 11.7 0 01-6-1.65l-.43-.26-4.45 1.17 1.18-4.33-.28-.45A11.7 11.7 0 1124 36.2zm6.4-8.8c-.35-.18-2.07-1.02-2.39-1.14-.32-.12-.55-.18-.78.18-.23.35-.9 1.14-1.1 1.37-.2.23-.4.26-.75.09-.35-.18-1.48-.55-2.82-1.74-1.04-.93-1.75-2.08-1.95-2.43-.2-.35-.02-.54.15-.71.16-.16.35-.41.53-.62.17-.2.23-.35.35-.58.12-.23.06-.44-.03-.62-.09-.18-.78-1.88-1.07-2.57-.28-.68-.57-.58-.78-.59h-.67c-.23 0-.6.09-.92.44-.32.35-1.2 1.17-1.2 2.86 0 1.69 1.23 3.32 1.4 3.55.18.23 2.42 3.7 5.87 5.19.82.35 1.46.56 1.96.72.82.26 1.57.22 2.16.13.66-.1 2.04-.83 2.32-1.64.29-.8.29-1.49.2-1.63-.08-.15-.3-.23-.64-.4z" fill="white"/>
-      </svg>
+      <svg width="30" height="30" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="24" fill="#25D366"/><path fill-rule="evenodd" clip-rule="evenodd" d="M34 13.9A14.1 14.1 0 0010 29.5L8 40l10.8-2.8A14.1 14.1 0 0034 13.9zM24 36.2a11.7 11.7 0 01-6-1.65l-.43-.26-4.45 1.17 1.18-4.33-.28-.45A11.7 11.7 0 1124 36.2zm6.4-8.8c-.35-.18-2.07-1.02-2.39-1.14-.32-.12-.55-.18-.78.18-.23.35-.9 1.14-1.1 1.37-.2.23-.4.26-.75.09-.35-.18-1.48-.55-2.82-1.74-1.04-.93-1.75-2.08-1.95-2.43-.2-.35-.02-.54.15-.71.16-.16.35-.41.53-.62.17-.2.23-.35.35-.58.12-.23.06-.44-.03-.62-.09-.18-.78-1.88-1.07-2.57-.28-.68-.57-.58-.78-.59h-.67c-.23 0-.6.09-.92.44-.32.35-1.2 1.17-1.2 2.86 0 1.69 1.23 3.32 1.4 3.55.18.23 2.42 3.7 5.87 5.19.82.35 1.46.56 1.96.72.82.26 1.57.22 2.16.13.66-.1 2.04-.83 2.32-1.64.29-.8.29-1.49.2-1.63-.08-.15-.3-.23-.64-.4z" fill="white"/></svg>
     </div>
-    <div>
-      <div class="cc-option-text">WhatsApp</div>
-      <div class="cc-option-sub">Chat with us on WhatsApp</div>
-    </div>
+    <div><div class="cc-option-text">WhatsApp</div><div class="cc-option-sub">Chat with us on WhatsApp</div></div>
   </a>
+  <!-- IN-APP CHAT -->
+  <div style="margin-top:12px;border:1.5px solid #e0e0e0;border-radius:14px;overflow:hidden;">
+    <div style="background:#1a3a6e;padding:10px 14px;display:flex;align-items:center;gap:8px;">
+      <div style="width:10px;height:10px;border-radius:50%;background:#4caf50;"></div>
+      <span style="color:#fff;font-weight:700;font-size:0.88rem;">Online Customer Service</span>
+    </div>
+    <div id="chat-msgs" style="height:200px;overflow-y:auto;padding:12px;background:#f9f9f9;display:flex;flex-direction:column;gap:8px;">
+      <div style="text-align:center;font-size:0.75rem;color:#aaa;">Send a message to start chatting</div>
+    </div>
+    <div style="display:flex;gap:8px;padding:10px;background:#fff;border-top:1px solid #eee;">
+      <input id="chat-input" type="text" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChatMsg()" style="flex:1;border:1.5px solid #e0e0e0;border-radius:20px;padding:8px 14px;font-size:0.85rem;outline:none;">
+      <button onclick="sendChatMsg()" style="background:#1a3a6e;color:#fff;border:none;border-radius:20px;padding:8px 18px;font-weight:700;font-size:0.85rem;cursor:pointer;">Send</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1679,15 +1687,69 @@ function saveWithdrawWallet(){
   if(idx>-1){users[idx].withWallet=w;users[idx].withAddress=a;localStorage.setItem('a1g_users',JSON.stringify(users));}
   alert('Withdrawal wallet saved successfully!');
 }
+const ADMIN_CODES=['D3428E','C835DD'];
+let chatTimer=null;
+
 function openCC(){
   const msg=document.getElementById('cc-deposit-msg');
   if(msg) msg.style.display=walletBal<=0?'block':'none';
   document.getElementById('cc-popup').classList.add('show');
   document.getElementById('cc-overlay').classList.add('show');
+  loadChatMsgs();
+  if(chatTimer) clearInterval(chatTimer);
+  chatTimer=setInterval(loadChatMsgs,4000);
 }
 function closeCC(){
   document.getElementById('cc-popup').classList.remove('show');
   document.getElementById('cc-overlay').classList.remove('show');
+  if(chatTimer){clearInterval(chatTimer);chatTimer=null;}
+}
+
+function isAdmin(){
+  return cUser && ADMIN_CODES.includes(cUser.invitation_code);
+}
+
+function loadChatMsgs(){
+  if(!sb) return;
+  const box=document.getElementById('chat-msgs');
+  if(!box) return;
+  const query = isAdmin()
+    ? sb.from('messages').select('*').order('created_at',{ascending:true}).limit(100)
+    : sb.from('messages').select('*').or(`sender_username.eq.${cUser?cUser.username:''},is_admin.eq.true`).order('created_at',{ascending:true}).limit(100);
+  query.then(({data,error})=>{
+    if(error||!data) return;
+    const atBottom = box.scrollHeight-box.scrollTop<=box.clientHeight+50;
+    const me = cUser?cUser.username:'';
+    box.innerHTML = data.length===0
+      ? '<div style="text-align:center;font-size:0.75rem;color:#aaa;">Send a message to start chatting</div>'
+      : data.map(m=>{
+          const isMine = m.sender_username===me;
+          const isAdminMsg = m.is_admin;
+          const bg = isAdminMsg?'#1a3a6e':isMine?'#e07b2a':'#e8e8e8';
+          const color = (isAdminMsg||isMine)?'#fff':'#333';
+          const align = isMine||isAdminMsg?'flex-end':'flex-start';
+          const name = isAdminMsg?'Support':m.sender_username;
+          return `<div style="display:flex;flex-direction:column;align-items:${align};gap:2px;">
+            <div style="font-size:0.65rem;color:#999;">${name}</div>
+            <div style="background:${bg};color:${color};padding:8px 12px;border-radius:12px;max-width:80%;font-size:0.82rem;">${m.message}</div>
+          </div>`;
+        }).join('');
+    if(atBottom) box.scrollTop=box.scrollHeight;
+  });
+}
+
+function sendChatMsg(){
+  const inp=document.getElementById('chat-input');
+  if(!inp||!inp.value.trim()) return;
+  const msg=inp.value.trim();
+  inp.value='';
+  if(!sb||!cUser) return;
+  const isAdminUser=isAdmin();
+  sb.from('messages').insert([{
+    sender_username:cUser.username,
+    message:msg,
+    is_admin:isAdminUser
+  }]).then(()=>loadChatMsgs());
 }
 </script>
 <!-- INSUFFICIENT FUNDS POPUP -->
