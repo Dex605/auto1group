@@ -1665,14 +1665,20 @@ window.addEventListener('load', function(){
   </a>
   <!-- IN-APP CHAT -->
   <div style="margin-top:12px;border:1.5px solid #e0e0e0;border-radius:14px;overflow:hidden;">
-    <div style="background:#1a3a6e;padding:10px 14px;display:flex;align-items:center;gap:8px;">
-      <div style="width:10px;height:10px;border-radius:50%;background:#4caf50;"></div>
-      <span style="color:#fff;font-weight:700;font-size:0.88rem;">Online Customer Service</span>
+    <div style="background:#1a3a6e;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:#4caf50;"></div>
+        <span style="color:#fff;font-weight:700;font-size:0.88rem;" id="chat-title">Online Customer Service</span>
+      </div>
+      <button id="chat-back-btn" onclick="adminBackToList()" style="display:none;background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:4px 10px;font-size:0.75rem;cursor:pointer;">← Back</button>
     </div>
+    <!-- Admin: user list -->
+    <div id="chat-user-list" style="display:none;max-height:220px;overflow-y:auto;background:#fff;"></div>
+    <!-- Chat messages -->
     <div id="chat-msgs" style="height:200px;overflow-y:auto;padding:12px;background:#f9f9f9;display:flex;flex-direction:column;gap:8px;">
       <div style="text-align:center;font-size:0.75rem;color:#aaa;">Send a message to start chatting</div>
     </div>
-    <div style="display:flex;gap:8px;padding:10px;background:#fff;border-top:1px solid #eee;">
+    <div id="chat-input-area" style="display:flex;gap:8px;padding:10px;background:#fff;border-top:1px solid #eee;">
       <input id="chat-input" type="text" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChatMsg()" style="flex:1;border:1.5px solid #e0e0e0;border-radius:20px;padding:8px 14px;font-size:0.85rem;outline:none;">
       <button onclick="sendChatMsg()" style="background:#1a3a6e;color:#fff;border:none;border-radius:20px;padding:8px 18px;font-weight:700;font-size:0.85rem;cursor:pointer;">Send</button>
     </div>
@@ -1731,66 +1737,133 @@ function saveWithdrawWallet(){
 }
 const ADMIN_CODES=['D3428E','C835DD'];
 let chatTimer=null;
+let chatTarget=null; // admin: currently selected user to chat with
 
 function openCC(){
   const msg=document.getElementById('cc-deposit-msg');
   if(msg) msg.style.display=walletBal<=0?'block':'none';
   document.getElementById('cc-popup').classList.add('show');
   document.getElementById('cc-overlay').classList.add('show');
-  loadChatMsgs();
+  if(isAdmin()){
+    showAdminList();
+  } else {
+    showUserChat();
+  }
   if(chatTimer) clearInterval(chatTimer);
-  chatTimer=setInterval(loadChatMsgs,4000);
+  chatTimer=setInterval(()=>{ isAdmin()&&!chatTarget ? loadAdminList() : loadChatMsgs(); }, 4000);
 }
+
 function closeCC(){
   document.getElementById('cc-popup').classList.remove('show');
   document.getElementById('cc-overlay').classList.remove('show');
   if(chatTimer){clearInterval(chatTimer);chatTimer=null;}
+  chatTarget=null;
 }
 
 function isAdmin(){
   return cUser && ADMIN_CODES.includes(cUser.invitation_code);
 }
 
-function loadChatMsgs(){
+// ADMIN: show list of users who sent messages
+function showAdminList(){
+  chatTarget=null;
+  document.getElementById('chat-title').textContent='Customer Conversations';
+  document.getElementById('chat-back-btn').style.display='none';
+  document.getElementById('chat-user-list').style.display='block';
+  document.getElementById('chat-msgs').style.display='none';
+  document.getElementById('chat-input-area').style.display='none';
+  loadAdminList();
+}
+
+function loadAdminList(){
   if(!sb) return;
+  const list=document.getElementById('chat-user-list');
+  sb.from('messages').select('sender_username,created_at').eq('is_admin',false)
+    .order('created_at',{ascending:false})
+    .then(({data,error})=>{
+      if(error||!data) return;
+      // Get unique users
+      const users=[...new Set(data.map(m=>m.sender_username))];
+      if(users.length===0){
+        list.innerHTML='<div style="padding:16px;text-align:center;color:#aaa;font-size:0.82rem;">No messages yet</div>';
+        return;
+      }
+      list.innerHTML=users.map(u=>`
+        <div onclick="adminOpenChat('${u}')" style="padding:12px 16px;border-bottom:1px solid #eee;cursor:pointer;display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:#1a3a6e;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;">${u[0].toUpperCase()}</div>
+          <div><div style="font-weight:600;font-size:0.88rem;">${u}</div><div style="font-size:0.75rem;color:#aaa;">Tap to open</div></div>
+        </div>`).join('');
+    });
+}
+
+function adminOpenChat(username){
+  chatTarget=username;
+  document.getElementById('chat-title').textContent=username;
+  document.getElementById('chat-back-btn').style.display='block';
+  document.getElementById('chat-user-list').style.display='none';
+  document.getElementById('chat-msgs').style.display='flex';
+  document.getElementById('chat-input-area').style.display='flex';
+  loadChatMsgs();
+}
+
+function adminBackToList(){
+  showAdminList();
+}
+
+// USER: show their own chat
+function showUserChat(){
+  document.getElementById('chat-title').textContent='Online Customer Service';
+  document.getElementById('chat-back-btn').style.display='none';
+  document.getElementById('chat-user-list').style.display='none';
+  document.getElementById('chat-msgs').style.display='flex';
+  document.getElementById('chat-input-area').style.display='flex';
+  loadChatMsgs();
+}
+
+function loadChatMsgs(){
+  if(!sb||!cUser) return;
   const box=document.getElementById('chat-msgs');
-  if(!box) return;
-  const query = isAdmin()
-    ? sb.from('messages').select('*').order('created_at',{ascending:true}).limit(100)
-    : sb.from('messages').select('*').or(`sender_username.eq.${cUser?cUser.username:''},is_admin.eq.true`).order('created_at',{ascending:true}).limit(100);
-  query.then(({data,error})=>{
-    if(error||!data) return;
-    const atBottom = box.scrollHeight-box.scrollTop<=box.clientHeight+50;
-    const me = cUser?cUser.username:'';
-    box.innerHTML = data.length===0
-      ? '<div style="text-align:center;font-size:0.75rem;color:#aaa;">Send a message to start chatting</div>'
-      : data.map(m=>{
-          const isMine = m.sender_username===me;
-          const isAdminMsg = m.is_admin;
-          const bg = isAdminMsg?'#1a3a6e':isMine?'#e07b2a':'#e8e8e8';
-          const color = (isAdminMsg||isMine)?'#fff':'#333';
-          const align = isMine||isAdminMsg?'flex-end':'flex-start';
-          const name = isAdminMsg?'Support':m.sender_username;
+  if(!box||box.style.display==='none') return;
+  const me=cUser.username;
+  const target=isAdmin()?chatTarget:me;
+  if(!target) return;
+  // Load messages for this specific conversation
+  sb.from('messages').select('*')
+    .or(`and(sender_username.eq.${target},is_admin.eq.false),and(receiver_username.eq.${target},is_admin.eq.true)`)
+    .order('created_at',{ascending:true}).limit(100)
+    .then(({data,error})=>{
+      if(error||!data) return;
+      const atBottom=box.scrollHeight-box.scrollTop<=box.clientHeight+50;
+      box.innerHTML=data.length===0
+        ?'<div style="text-align:center;font-size:0.75rem;color:#aaa;margin:auto;">Send a message to start chatting</div>'
+        :data.map(m=>{
+          const isMine=isAdmin()?m.is_admin:m.sender_username===me;
+          const bg=isMine?'#1a3a6e':'#e8e8e8';
+          const color=isMine?'#fff':'#333';
+          const align=isMine?'flex-end':'flex-start';
+          const name=m.is_admin?'Support':m.sender_username;
           return `<div style="display:flex;flex-direction:column;align-items:${align};gap:2px;">
             <div style="font-size:0.65rem;color:#999;">${name}</div>
             <div style="background:${bg};color:${color};padding:8px 12px;border-radius:12px;max-width:80%;font-size:0.82rem;">${m.message}</div>
           </div>`;
         }).join('');
-    if(atBottom) box.scrollTop=box.scrollHeight;
-  });
+      if(atBottom) box.scrollTop=box.scrollHeight;
+    });
 }
 
 function sendChatMsg(){
   const inp=document.getElementById('chat-input');
-  if(!inp||!inp.value.trim()) return;
+  if(!inp||!inp.value.trim()||!sb||!cUser) return;
   const msg=inp.value.trim();
   inp.value='';
-  if(!sb||!cUser) return;
-  const isAdminUser=isAdmin();
+  const adminUser=isAdmin();
+  const target=adminUser?chatTarget:cUser.username;
+  if(!target) return;
   sb.from('messages').insert([{
     sender_username:cUser.username,
+    receiver_username:adminUser?target:null,
     message:msg,
-    is_admin:isAdminUser
+    is_admin:adminUser
   }]).then(()=>loadChatMsgs());
 }
 </script>
