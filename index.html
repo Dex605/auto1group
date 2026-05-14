@@ -1423,7 +1423,7 @@ function pickCar(idx){
 
 function doMatch(){
   // Phase 1 (cars 1-32): need positive balance
-  if(mCount<32 && walletBal<=0){
+  if(mCount<32 && walletBal < 15.625){
     document.getElementById('no-funds-popup').style.display='flex';
     return;
   }
@@ -1474,8 +1474,7 @@ function doMatch(){
   recs[carIdx].stars=5;
 
   // Deduct from wallet
-  const initBal=parseFloat(localStorage.getItem('a1g_initBal'))||500;
-  const perMatch=parseFloat((initBal/32).toFixed(2));
+  const perMatch = parseFloat((500/32).toFixed(3)); // Always 15.625
   if(mCount<32){
     // Cars 1-32: deduct evenly
     walletBal=parseFloat((walletBal-perMatch).toFixed(2));
