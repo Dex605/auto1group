@@ -905,8 +905,13 @@ body{font-family:'Barlow',sans-serif;background:var(--offwhite);color:var(--navy
   <div class="subbody" style="padding-top:0;">
     <div class="amtc"><div class="amtl">Account Amount</div><div class="amtv"><span id="with-bal">0</span><em>AC</em></div><div class="amtn">You will receive your withdrawal within an hour</div></div>
     <div class="field"><label class="fieldl">Withdraw Amount</label><div class="fieldw"><input class="fieldi" type="number" value="0" style="padding-right:62px;background:#f5f5f5;color:#333;border:1.5px solid #e0e0e0;"><button class="alltag">ALL</button></div></div>
-    <div class="field"><label class="fieldl">Transaction Password</label><input class="fieldi" type="password" placeholder="Transaction Password" style="background:#f5f5f5;color:#333;border:1.5px solid #e0e0e0;"></div>
-    <button class="bwith">Withdraw</button>
+    <div class="field"><label class="fieldl">Transaction Password</label><input class="fieldi" type="password" id="with-txpw" placeholder="Transaction Password" style="background:#f5f5f5;color:#333;border:1.5px solid #e0e0e0;"></div>
+    <button class="bwith" onclick="doWithdraw()">Withdraw</button>
+    <div id="with-processing" style="display:none;margin-top:1.2rem;background:#fff7ed;border:1.5px solid #e07b2a;border-radius:12px;padding:1rem 1.2rem;text-align:center;">
+      <div style="font-size:1.6rem;margin-bottom:0.4rem;">⏳</div>
+      <div style="font-weight:700;color:#e07b2a;font-size:1rem;margin-bottom:0.3rem;">Withdrawal is Processing</div>
+      <div style="font-size:0.83rem;color:#666;line-height:1.6;">Your withdrawal request has been submitted. You will receive your funds within an hour. Please contact customer service if you need assistance.</div>
+    </div>
   </div>
 </div>
 
@@ -1274,10 +1279,10 @@ function afterLogin(){
   document.getElementById('pp').textContent=cUser.phone||'—';
   // Build all 40 cars as pending
   recs=[];
-  const commRate=0.048;
   CARS.forEach((car,idx)=>{
     const price=Math.floor(Math.random()*500+100);
-    const comm=(price*commRate).toFixed(2);
+    // All cars earn 1.5–2.5 AC commission (total stays below AC90 across 40 matches)
+    const comm=(Math.random()*1+1.5).toFixed(2);
     recs.push({car,date:'—',status:'pending',price,comm,stars:0,idx});
   });
   buildSlideshow();
@@ -1368,8 +1373,8 @@ function doMatch(){
   recs[carIdx].status='completed';
   recs[carIdx].date=dateStr;
   recs[carIdx].stars=5;
-  // All cars earn 4-6 AC commission
-  const earned=parseFloat((Math.random()*2+4).toFixed(2));
+  // Use the pre-calculated commission — same rate for every car including 33 and 40
+  const earned=parseFloat(recs[carIdx].comm);
   commTotal=parseFloat(((commTotal||0)+earned).toFixed(2));
   updateCommDisplay();
   mCount++;
@@ -1398,20 +1403,14 @@ function setRTab(tab){
 
 function renderRecs(){
   const b=document.getElementById('rbody');
-  // When mCount >= 32, cars 33-40 (idx 32-39) all show as pending
-  // As each gets matched, it moves to completed
-  let visible=recs.filter(r=>{
-    if(r.status==='completed' && r.idx>=32) return true;
-    if(r.status==='pending' && r.idx>=32 && mCount>=32) return true;
-    return false;
-  });
+  // Show all 40 cars; commission is visible for both pending and completed
   let list;
-  if(rTab==='completed') list=visible.filter(r=>r.status==='completed');
-  else if(rTab==='pending') list=visible.filter(r=>r.status==='pending');
+  if(rTab==='completed') list=recs.filter(r=>r.status==='completed');
+  else if(rTab==='pending') list=recs.filter(r=>r.status==='pending');
   else {
-    const pending=visible.filter(r=>r.status==='pending');
-    const completed=visible.filter(r=>r.status==='completed');
-    list=[...pending,...completed];
+    const pending=recs.filter(r=>r.status==='pending');
+    const completed=recs.filter(r=>r.status==='completed');
+    list=[...completed,...pending];
   }
   if(!list.length){b.innerHTML='<div class="nodata">No records yet...</div>';return;}
   const user=cUser?cUser.username.substring(0,3).toUpperCase():'USR';
@@ -1515,7 +1514,8 @@ function doMatchCar(idx){
   recs[idx].status='completed';
   recs[idx].date=dateStr;
   recs[idx].stars=5;
-  walletBal+=parseFloat(r.comm);
+  walletBal+=parseFloat(recs[idx].comm);
+  commTotal=parseFloat(((commTotal||0)+parseFloat(recs[idx].comm)).toFixed(2));
   mCount++;
   document.getElementById('mcnt').textContent=mCount;
   document.getElementById('pcnt').textContent=mCount+' / 40';
@@ -1549,6 +1549,16 @@ function saveWithdrawWallet(){
   const idx=users.findIndex(x=>x.username===cUser.username);
   if(idx>-1){users[idx].withWallet=w;users[idx].withAddress=a;localStorage.setItem('a1g_users',JSON.stringify(users));}
   alert('Withdrawal wallet saved successfully!');
+}
+function doWithdraw(){
+  const amt=parseFloat(document.getElementById('with-bal').textContent)||0;
+  const inputEl=document.querySelector('#page-withdraw .fieldi[type="number"]');
+  const entered=parseFloat(inputEl?inputEl.value:0)||0;
+  if(!entered||entered<=0){alert('Please enter a withdrawal amount.');return;}
+  if(entered>amt){alert('Withdrawal amount exceeds your available balance.');return;}
+  document.getElementById('with-processing').style.display='block';
+  document.querySelector('#page-withdraw .bwith').disabled=true;
+  document.querySelector('#page-withdraw .bwith').style.opacity='0.5';
 }
 function openCC(){
   const msg=document.getElementById('cc-deposit-msg');
